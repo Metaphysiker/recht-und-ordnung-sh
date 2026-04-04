@@ -1,11 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using webapi.Models;
 using webapi.Models.DTOs;
+using webapi.Models.ModelsImpl;
 
 namespace webapi.Controllers;
 
@@ -46,7 +48,7 @@ public class AuthController : ControllerBase
             return BadRequest(result.Errors);
         }
 
-        var token = GenerateJwtToken(user);
+        var token = await GenerateJwtToken(user);
 
         return Ok(new AuthResponseDto
         {
@@ -74,7 +76,7 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid email or password");
         }
 
-        var token = GenerateJwtToken(user);
+        var token = await GenerateJwtToken(user);
 
         return Ok(new AuthResponseDto
         {
@@ -85,9 +87,42 @@ public class AuthController : ControllerBase
         });
     }
 
-    private string GenerateJwtToken(ApplicationUser user)
+    [Authorize]
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken()
     {
-        var claims = new[]
+        // Get user ID from the current token claims
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("Invalid token");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return Unauthorized("User not found");
+        }
+
+        // Generate a new token
+        var token = await GenerateJwtToken(user);
+
+        return Ok(new AuthResponseDto
+        {
+            Token = token,
+            Email = user.Email!,
+            FirstName = user.FirstName,
+            LastName = user.LastName
+        });
+    }
+
+    private async Task<string> GenerateJwtToken(ApplicationUser user)
+    {
+        var roles = await _userManager.GetRolesAsync(user);
+        
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
@@ -95,6 +130,12 @@ public class AuthController : ControllerBase
             new Claim("lastName", user.LastName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
+        // Add each role as a separate ClaimTypes.Role claim
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

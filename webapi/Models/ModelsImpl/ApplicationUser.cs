@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace webapi.Models;
+namespace webapi.Models.ModelsImpl;
 
-public class ApplicationUser : IdentityUser<Guid>
+public class ApplicationUser : IdentityUser<Guid>, IModel
 {
     public required string FirstName { get; set; }
     public required string LastName { get; set; }

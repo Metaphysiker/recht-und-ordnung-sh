@@ -55,6 +55,38 @@ public class AuthService
         await RemoveTokenAsync();
     }
 
+    public async Task<bool> RefreshTokenAsync()
+    {
+        var token = await GetTokenAsync();
+        
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return false;
+        }
+
+        try
+        {
+            var response = await _httpClient.PostAsync("api/auth/refresh", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                if (authResponse != null)
+                {
+                    await SetTokenAsync(authResponse.Token);
+                    return true;
+                }
+            }
+        }
+        catch
+        {
+            // If refresh fails, logout
+            await LogoutAsync();
+        }
+
+        return false;
+    }
+
     public async Task<string?> GetTokenAsync()
     {
         return await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", TokenKey);

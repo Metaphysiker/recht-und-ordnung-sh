@@ -101,6 +101,7 @@ wwwroot/js/
 docker-compose.override.yml
 
 # Environment files with secrets
+.env
 .env.local
 .env.production.local
 *.env.local

@@ -41,4 +41,12 @@ builder.Services.AddScoped(sp =>
 
 builder.Services.AddMudServices();
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+
+// Refresh token on app startup if user is logged in
+var authService = host.Services.GetRequiredService<AuthService>();
+var authStateProvider = host.Services.GetRequiredService<CustomAuthStateProvider>();
+await authService.RefreshTokenAsync();
+authStateProvider.NotifyAuthenticationStateChanged();
+
+await host.RunAsync();

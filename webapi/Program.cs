@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using webapi.Data;
 using webapi.Models;
+using webapi.Models.ModelsImpl;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -102,6 +103,11 @@ using (var scope = app.Services.CreateScope())
             throw;
         }
     }
+
+    // Seed admin user
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    await DatabaseSeeder.SeedAdminUserAsync(userManager, roleManager, logger, app.Configuration);
 }
 
 // Configure the HTTP request pipeline.

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using webapi.Models;
+using webapi.Models.ModelsImpl;
 
 namespace webapi.Data;
 
@@ -11,6 +12,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
         : base(options)
     {
     }
+
+    // Example DbSet - add your entities here
+    public DbSet<ExampleEntity> Examples { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

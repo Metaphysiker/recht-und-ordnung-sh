@@ -6,6 +6,8 @@ services:
     container_name: blazor-wasm
     ports:
       - "${BLAZOR_WASM_PORT}:80"
+    environment:
+      - API_URL=${API_URL}
 
   webapi:
     build:
@@ -21,6 +23,7 @@ services:
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     depends_on:
       - postgres
 

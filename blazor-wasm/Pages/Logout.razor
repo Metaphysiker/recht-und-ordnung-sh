@@ -1,0 +1,22 @@
+@page "/logout"
+@using blazor_wasm.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Elevation="3" Class="pa-6">
+        <MudText Typo="Typo.h5" Align="Align.Center">Logging out...</MudText>
+        <MudProgressLinear Indeterminate="true" Class="mt-4" />
+    </MudPaper>
+</MudContainer>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.LogoutAsync();
+        ((CustomAuthStateProvider)AuthStateProvider).NotifyAuthenticationStateChanged();
+        Navigation.NavigateTo("/login");
+    }
+}

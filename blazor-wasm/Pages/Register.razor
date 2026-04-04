@@ -1,0 +1,124 @@
+@page "/register"
+@using blazor_wasm.Models
+@using blazor_wasm.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Elevation="3" Class="pa-6">
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">Register</MudText>
+
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@_errorMessage</MudAlert>
+        }
+
+        @if (!string.IsNullOrEmpty(_successMessage))
+        {
+            <MudAlert Severity="Severity.Success" Class="mb-4">@_successMessage</MudAlert>
+        }
+
+        <MudForm @ref="_form">
+            <MudTextField @bind-Value="_model.Email" 
+                          Label="Email" 
+                          Variant="Variant.Outlined" 
+                          Required="true"
+                          RequiredError="Email is required"
+                          InputType="InputType.Email"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="_model.FirstName" 
+                          Label="First Name" 
+                          Variant="Variant.Outlined" 
+                          Required="true"
+                          RequiredError="First name is required"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="_model.LastName" 
+                          Label="Last Name" 
+                          Variant="Variant.Outlined" 
+                          Required="true"
+                          RequiredError="Last name is required"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="_model.PhoneNumber" 
+                          Label="Phone Number (Optional)" 
+                          Variant="Variant.Outlined" 
+                          InputType="InputType.Telephone"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="_model.Password" 
+                          Label="Password" 
+                          Variant="Variant.Outlined" 
+                          Required="true"
+                          RequiredError="Password is required"
+                          InputType="InputType.Password"
+                          HelperText="Minimum 8 characters, at least one uppercase, one lowercase, and one digit"
+                          Class="mb-4" />
+
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       FullWidth="true"
+                       OnClick="HandleRegister"
+                       Disabled="_isLoading"
+                       Class="mb-3">
+                @if (_isLoading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>Register</span>
+                }
+            </MudButton>
+
+            <MudText Align="Align.Center">
+                Already have an account? 
+                <MudLink Href="/login" Color="Color.Primary">Login</MudLink>
+            </MudText>
+        </MudForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private MudForm? _form;
+    private RegisterDto _model = new() { Email = "", Password = "", FirstName = "", LastName = "" };
+    private string? _errorMessage;
+    private string? _successMessage;
+    private bool _isLoading;
+
+    private async Task HandleRegister()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            var result = await AuthService.RegisterAsync(_model);
+
+            if (result != null)
+            {
+                _successMessage = "Registration successful! Redirecting...";
+                ((CustomAuthStateProvider)AuthStateProvider).NotifyAuthenticationStateChanged();
+                
+                await Task.Delay(1500);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                _errorMessage = "Registration failed. Please check your information.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Registration failed: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

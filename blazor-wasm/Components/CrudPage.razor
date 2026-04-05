@@ -1,0 +1,154 @@
+@typeparam TDto
+@typeparam TSearchDto where TSearchDto : SearchDto, new()
+@using blazor_wasm.Models
+@using blazor_wasm.Services
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<CrudSearchList TDto="TDto"
+                TSearchDto="TSearchDto"
+                @ref="_searchList"
+                Title="@Title"
+                Service="@Service"
+                TableHeaders="@TableHeaders"
+                RowTemplate="@RowTemplate"
+                SearchFilters="@SearchFilters"
+                OnCreateClicked="OpenCreateDialog"
+                OnEditClicked="OpenEditDialog"
+                OnDeleteClicked="ConfirmDelete"
+                CanCreate="@CanCreate"
+                CanEdit="@CanEdit"
+                CanDelete="@CanDelete"
+                PageSize="@PageSize" />
+
+@code {
+    [Parameter] public required string Title { get; set; }
+    [Parameter] public required CrudService<TDto, TSearchDto> Service { get; set; }
+    [Parameter] public required RenderFragment TableHeaders { get; set; }
+    [Parameter] public required RenderFragment<TDto> RowTemplate { get; set; }
+    [Parameter] public required RenderFragment<TDto> FormContent { get; set; }
+    [Parameter] public required Func<TDto> CreateNewInstance { get; set; }
+    [Parameter] public required Func<TDto, Guid?> GetId { get; set; }
+    [Parameter] public RenderFragment<TSearchDto>? SearchFilters { get; set; }
+    [Parameter] public bool CanCreate { get; set; } = true;
+    [Parameter] public bool CanEdit { get; set; } = true;
+    [Parameter] public bool CanDelete { get; set; } = true;
+    [Parameter] public int PageSize { get; set; } = 10;
+    [Parameter] public string DialogTitle { get; set; } = "Item";
+
+    private CrudSearchList<TDto, TSearchDto>? _searchList;
+
+    private async Task OpenCreateDialog()
+    {
+        var newItem = CreateNewInstance();
+        var parameters = new DialogParameters<CrudDialog<TDto>>
+        {
+            { x => x.Model, newItem },
+            { x => x.FormContent, FormContent },
+            { x => x.DialogTitle, DialogTitle },
+            { x => x.IsEditMode, false },
+            { x => x.OnSubmit, EventCallback.Factory.Create<TDto>(this, async (item) => {
+                await HandleCreate(item);
+                await RefreshList();
+            })},
+            { x => x.OnCancel, EventCallback.Factory.Create(this, () => {})}
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        await DialogService.ShowAsync<CrudDialog<TDto>>($"Create {DialogTitle}", parameters, options);
+    }
+
+    private async Task OpenEditDialog(TDto item)
+    {
+        var parameters = new DialogParameters<CrudDialog<TDto>>
+        {
+            { x => x.Model, item },
+            { x => x.FormContent, FormContent },
+            { x => x.DialogTitle, DialogTitle },
+            { x => x.IsEditMode, true },
+            { x => x.OnSubmit, EventCallback.Factory.Create<TDto>(this, async (updatedItem) => {
+                await HandleUpdate(updatedItem);
+                await RefreshList();
+            })},
+            { x => x.OnCancel, EventCallback.Factory.Create(this, () => {})}
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        await DialogService.ShowAsync<CrudDialog<TDto>>($"Edit {DialogTitle}", parameters, options);
+    }
+
+    private async Task ConfirmDelete(TDto item)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", $"Are you sure you want to delete this {DialogTitle.ToLower()}?" },
+            { "ButtonText", "Delete" },
+            { "Color", Color.Error }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<MudMessageBox>("Confirm Delete", parameters, options);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await HandleDelete(item);
+        }
+    }
+
+    private async Task HandleCreate(TDto item)
+    {
+        var result = await Service.CreateAsync(item);
+        if (result != null)
+        {
+            Snackbar.Add($"{DialogTitle} created successfully", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add($"Failed to create {DialogTitle.ToLower()}", Severity.Error);
+        }
+    }
+
+    private async Task HandleUpdate(TDto item)
+    {
+        var id = GetId(item);
+        if (id.HasValue)
+        {
+            var result = await Service.UpdateAsync(id.Value, item);
+            if (result != null)
+            {
+                Snackbar.Add($"{DialogTitle} updated successfully", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Failed to update {DialogTitle.ToLower()}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task HandleDelete(TDto item)
+    {
+        var id = GetId(item);
+        if (id.HasValue)
+        {
+            var success = await Service.DeleteAsync(id.Value);
+            if (success)
+            {
+                Snackbar.Add($"{DialogTitle} deleted successfully", Severity.Success);
+                await RefreshList();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to delete {DialogTitle.ToLower()}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task RefreshList()
+    {
+        if (_searchList != null)
+        {
+            await _searchList.RefreshAsync();
+        }
+    }
+}

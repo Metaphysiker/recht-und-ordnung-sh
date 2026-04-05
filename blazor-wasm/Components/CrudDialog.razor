@@ -1,0 +1,60 @@
+@typeparam TDto
+@using blazor_wasm.Models
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(IsEditMode ? $"Edit {DialogTitle}" : $"Create {DialogTitle}")</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_form" Model="@Model">
+            @FormContent(Model)
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Default">Cancel</MudButton>
+        <MudButton OnClick="Submit"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="_isSaving">
+            @if (_isSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+            }
+            else
+            {
+                <span>@(IsEditMode ? "Update" : "Create")</span>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public required TDto Model { get; set; }
+    [Parameter] public required RenderFragment<TDto> FormContent { get; set; }
+    [Parameter] public EventCallback<TDto> OnSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter] public string DialogTitle { get; set; } = "Item";
+
+    private MudForm? _form;
+    private bool _isSaving;
+
+    private async Task Submit()
+    {
+        if (_form != null)
+        {
+            await _form.ValidateAsync();
+            if (_form.IsValid)
+            {
+                _isSaving = true;
+                await OnSubmit.InvokeAsync(Model);
+                _isSaving = false;
+            }
+        }
+    }
+
+    private async Task Cancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

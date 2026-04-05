@@ -21,45 +21,45 @@
         }
 
         <MudForm @ref="_form">
-            <MudTextField @bind-Value="_model.Email" 
-                          Label="Email" 
-                          Variant="Variant.Outlined" 
+            <MudTextField @bind-Value="_model.Email"
+                          Label="Email"
+                          Variant="Variant.Outlined"
                           Required="true"
                           RequiredError="Email is required"
                           InputType="InputType.Email"
                           Class="mb-4" />
 
-            <MudTextField @bind-Value="_model.FirstName" 
-                          Label="First Name" 
-                          Variant="Variant.Outlined" 
+            <MudTextField @bind-Value="_model.FirstName"
+                          Label="First Name"
+                          Variant="Variant.Outlined"
                           Required="true"
                           RequiredError="First name is required"
                           Class="mb-4" />
 
-            <MudTextField @bind-Value="_model.LastName" 
-                          Label="Last Name" 
-                          Variant="Variant.Outlined" 
+            <MudTextField @bind-Value="_model.LastName"
+                          Label="Last Name"
+                          Variant="Variant.Outlined"
                           Required="true"
                           RequiredError="Last name is required"
                           Class="mb-4" />
 
-            <MudTextField @bind-Value="_model.PhoneNumber" 
-                          Label="Phone Number (Optional)" 
-                          Variant="Variant.Outlined" 
+            <MudTextField @bind-Value="_model.PhoneNumber"
+                          Label="Phone Number (Optional)"
+                          Variant="Variant.Outlined"
                           InputType="InputType.Telephone"
                           Class="mb-4" />
 
-            <MudTextField @bind-Value="_model.Password" 
-                          Label="Password" 
-                          Variant="Variant.Outlined" 
+            <MudTextField @bind-Value="_model.Password"
+                          Label="Password"
+                          Variant="Variant.Outlined"
                           Required="true"
                           RequiredError="Password is required"
                           InputType="InputType.Password"
                           HelperText="Minimum 8 characters, at least one uppercase, one lowercase, and one digit"
                           Class="mb-4" />
 
-            <MudButton Variant="Variant.Filled" 
-                       Color="Color.Primary" 
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
                        FullWidth="true"
                        OnClick="HandleRegister"
                        Disabled="_isLoading"
@@ -75,7 +75,7 @@
             </MudButton>
 
             <MudText Align="Align.Center">
-                Already have an account? 
+                Already have an account?
                 <MudLink Href="/login" Color="Color.Primary">Login</MudLink>
             </MudText>
         </MudForm>
@@ -103,7 +103,7 @@
             {
                 _successMessage = "Registration successful! Redirecting...";
                 ((CustomAuthStateProvider)AuthStateProvider).NotifyAuthenticationStateChanged();
-                
+
                 await Task.Delay(1500);
                 Navigation.NavigateTo("/");
             }

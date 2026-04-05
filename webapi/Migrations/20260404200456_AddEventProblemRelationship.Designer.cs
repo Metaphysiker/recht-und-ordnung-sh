@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using webapi.Data;
@@ -11,9 +12,11 @@ using webapi.Data;
 namespace webapi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260404200456_AddEventProblemRelationship")]
+    partial class AddEventProblemRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -231,44 +234,6 @@ namespace webapi.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("webapi.Models.ModelsImpl.Event", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("EventDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("ProblemId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProblemId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Events");
-                });
-
             modelBuilder.Entity("webapi.Models.ModelsImpl.ExampleEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -292,36 +257,6 @@ namespace webapi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Examples");
-                });
-
-            modelBuilder.Entity("webapi.Models.ModelsImpl.Problem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Problems");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -373,42 +308,6 @@ namespace webapi.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("webapi.Models.ModelsImpl.Event", b =>
-                {
-                    b.HasOne("webapi.Models.ModelsImpl.Problem", "Problem")
-                        .WithMany("Events")
-                        .HasForeignKey("ProblemId");
-
-                    b.HasOne("webapi.Models.ModelsImpl.ApplicationUser", "User")
-                        .WithMany("Events")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Problem");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("webapi.Models.ModelsImpl.Problem", b =>
-                {
-                    b.HasOne("webapi.Models.ModelsImpl.ApplicationUser", "User")
-                        .WithMany("Problems")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("webapi.Models.ModelsImpl.ApplicationUser", b =>
-                {
-                    b.Navigation("Events");
-
-                    b.Navigation("Problems");
-                });
-
-            modelBuilder.Entity("webapi.Models.ModelsImpl.Problem", b =>
-                {
-                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }

@@ -16,9 +16,13 @@ var apiUrl = builder.Configuration["ApiUrl"] ?? "http://localhost:5001";
 // Register AuthService
 builder.Services.AddScoped<AuthService>();
 
+// Register CRUD services
+builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<ProblemService>();
+
 // Register custom AuthStateProvider
 builder.Services.AddScoped<CustomAuthStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(provider => 
+builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<CustomAuthStateProvider>());
 
 // Register Authorization
@@ -30,12 +34,12 @@ builder.Services.AddScoped(sp =>
 {
     var authHandler = sp.GetRequiredService<AuthorizationMessageHandler>();
     authHandler.InnerHandler = new HttpClientHandler();
-    
+
     var httpClient = new HttpClient(authHandler)
     {
         BaseAddress = new Uri(apiUrl)
     };
-    
+
     return httpClient;
 });
 
@@ -43,10 +47,8 @@ builder.Services.AddMudServices();
 
 var host = builder.Build();
 
-// Refresh token on app startup if user is logged in
-var authService = host.Services.GetRequiredService<AuthService>();
+// Notify authentication state on app startup
 var authStateProvider = host.Services.GetRequiredService<CustomAuthStateProvider>();
-await authService.RefreshTokenAsync();
 authStateProvider.NotifyAuthenticationStateChanged();
 
 await host.RunAsync();

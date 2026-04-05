@@ -16,24 +16,24 @@
         }
 
         <MudForm @ref="_form">
-            <MudTextField @bind-Value="_model.Email" 
-                          Label="Email" 
-                          Variant="Variant.Outlined" 
+            <MudTextField @bind-Value="_model.Email"
+                          Label="Email"
+                          Variant="Variant.Outlined"
                           Required="true"
                           RequiredError="Email is required"
                           InputType="InputType.Email"
                           Class="mb-4" />
 
-            <MudTextField @bind-Value="_model.Password" 
-                          Label="Password" 
-                          Variant="Variant.Outlined" 
+            <MudTextField @bind-Value="_model.Password"
+                          Label="Password"
+                          Variant="Variant.Outlined"
                           Required="true"
                           RequiredError="Password is required"
                           InputType="InputType.Password"
                           Class="mb-4" />
 
-            <MudButton Variant="Variant.Filled" 
-                       Color="Color.Primary" 
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
                        FullWidth="true"
                        OnClick="HandleLogin"
                        Disabled="_isLoading"
@@ -49,7 +49,7 @@
             </MudButton>
 
             <MudText Align="Align.Center">
-                Don't have an account? 
+                Don't have an account?
                 <MudLink Href="/register" Color="Color.Primary">Register</MudLink>
             </MudText>
         </MudForm>

@@ -77,11 +77,11 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    
+
     var retryCount = 0;
     var maxRetries = 10;
     var delaySeconds = 3;
-    
+
     while (retryCount < maxRetries)
     {
         try

@@ -1,0 +1,145 @@
+@typeparam TDto
+@typeparam TSearchDto where TSearchDto : SearchDto, new()
+@using blazor_wasm.Models
+@using blazor_wasm.Services
+
+<MudPaper Class="pa-4">
+    <MudStack Spacing="3">
+        <!-- Header with Title and Create Button -->
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5">@Title</MudText>
+            @if (CanCreate)
+            {
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@(() => OnCreateClicked.InvokeAsync())">
+                    Create New
+                </MudButton>
+            }
+        </MudStack>
+
+        <!-- Search Bar -->
+        <MudTextField @bind-Value="_searchTerm"
+                      Label="Search"
+                      Variant="Variant.Outlined"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      OnKeyUp="@(async (e) => { if (e.Key == "Enter") await SearchAsync(); })"
+                      DebounceInterval="300"
+                      OnDebounceIntervalElapsed="SearchAsync" />
+
+        <!-- Custom Search Filters (Optional) -->
+        @if (SearchFilters != null)
+        {
+            <div>
+                @SearchFilters(CurrentSearchDto)
+            </div>
+        }
+
+        <!-- Loading State -->
+        @if (_isLoading)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+        }
+
+        <!-- Results Table -->
+        @if (_paginationResult != null && _paginationResult.Items != null && _paginationResult.Items.Any())
+        {
+            <MudTable Items="_paginationResult.Items" Hover="true" Striped="true" Elevation="0">
+                <HeaderContent>
+                    @TableHeaders
+                </HeaderContent>
+                <RowTemplate>
+                    @RowTemplate(context)
+                    @if (CanEdit || CanDelete)
+                    {
+                        <MudTd Style="text-align: right;">
+                            @if (CanEdit)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                               Color="Color.Primary"
+                                               Size="Size.Small"
+                                               OnClick="@(() => OnEditClicked.InvokeAsync(context))" />
+                            }
+                            @if (CanDelete)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Color="Color.Error"
+                                               Size="Size.Small"
+                                               OnClick="@(() => OnDeleteClicked.InvokeAsync(context))" />
+                            }
+                        </MudTd>
+                    }
+                </RowTemplate>
+            </MudTable>
+
+            <!-- Pagination -->
+            <MudPagination Count="@_paginationResult.TotalPages"
+                           Selected="@(_currentPage + 1)"
+                           SelectedChanged="@OnPageChanged"
+                           ShowFirstButton="true"
+                           ShowLastButton="true"
+                           Class="mt-4" />
+
+            <MudText Typo="Typo.caption" Class="mt-2">
+                Showing @(_paginationResult.Items.Count()) of @_paginationResult.Total items
+            </MudText>
+        }
+        else if (!_isLoading)
+        {
+            <MudText Typo="Typo.body1" Align="Align.Center" Class="my-4">
+                No records found
+            </MudText>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Items";
+    [Parameter] public required CrudService<TDto, TSearchDto> Service { get; set; }
+    [Parameter] public RenderFragment? TableHeaders { get; set; }
+    [Parameter] public RenderFragment<TDto>? RowTemplate { get; set; }
+    [Parameter] public RenderFragment<TSearchDto>? SearchFilters { get; set; }
+    [Parameter] public EventCallback OnCreateClicked { get; set; }
+    [Parameter] public EventCallback<TDto> OnEditClicked { get; set; }
+    [Parameter] public EventCallback<TDto> OnDeleteClicked { get; set; }
+    [Parameter] public bool CanCreate { get; set; } = true;
+    [Parameter] public bool CanEdit { get; set; } = true;
+    [Parameter] public bool CanDelete { get; set; } = true;
+    [Parameter] public int PageSize { get; set; } = 10;
+
+    private PaginationDto<TDto>? _paginationResult;
+    private bool _isLoading;
+    private string? _searchTerm;
+    private int _currentPage = 0;
+    private TSearchDto CurrentSearchDto { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SearchAsync();
+    }
+
+    public async Task RefreshAsync()
+    {
+        await SearchAsync();
+    }
+
+    private async Task SearchAsync()
+    {
+        _isLoading = true;
+        CurrentSearchDto.SearchTerm = _searchTerm;
+        CurrentSearchDto.Page = _currentPage;
+        CurrentSearchDto.PageSize = PageSize;
+
+        _paginationResult = await Service.SearchAsync(CurrentSearchDto);
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task OnPageChanged(int page)
+    {
+        _currentPage = page - 1; // MudPagination uses 1-based indexing
+        await SearchAsync();
+    }
+}

@@ -8,4 +8,7 @@ public class ApplicationUser : IdentityUser<Guid>, IModel
     public required string LastName { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public ICollection<Event> Events { get; set; } = new List<Event>();
+    public ICollection<Problem> Problems { get; set; } = new List<Problem>();
 }

@@ -7,6 +7,11 @@
 
     <AuthorizeView>
         <Authorized>
+            <MudNavLink Href="/events" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
+            <MudNavLink Href="/problems" Icon="@Icons.Material.Filled.BugReport">Problems</MudNavLink>
+
+            <MudDivider Class="my-2" />
+
             <MudNavLink Href="/logout" Icon="@Icons.Material.Filled.Logout">Logout</MudNavLink>
         </Authorized>
         <NotAuthorized>

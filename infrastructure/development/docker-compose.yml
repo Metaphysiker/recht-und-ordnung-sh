@@ -24,8 +24,14 @@ services:
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - SMTP__Host=${SMTP_HOST}
+      - SMTP__Port=${SMTP_PORT}
+      - SMTP__FromEmail=${SMTP_FROM_EMAIL}
+      - SMTP__FromName=${SMTP_FROM_NAME}
+      - FrontendUrl=${FRONTEND_URL}
     depends_on:
       - postgres
+      - mailhog
 
   postgres:
     image: postgres:16-alpine
@@ -41,6 +47,13 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
 
 volumes:
   postgres-data:

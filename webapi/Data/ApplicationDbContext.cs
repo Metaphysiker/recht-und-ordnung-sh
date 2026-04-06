@@ -18,6 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public DbSet<Problem> Problems { get; set; }
     public DbSet<Event> Events { get; set; }
+    public DbSet<MagicLink> MagicLinks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

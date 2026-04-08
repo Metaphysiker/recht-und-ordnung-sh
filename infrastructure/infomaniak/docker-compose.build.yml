@@ -1,0 +1,14 @@
+services:
+  blazor-wasm:
+    build:
+      context: ../../blazor-wasm
+      dockerfile: Dockerfile
+      args:
+        - API_URL=${API_URL:-http://localhost:5001}
+    image: recht-und-ordnung-sh-production-blazor:latest
+    
+  webapi:
+    build:
+      context: ../../webapi
+      dockerfile: Dockerfile
+    image: recht-und-ordnung-sh-production-webapi:latest

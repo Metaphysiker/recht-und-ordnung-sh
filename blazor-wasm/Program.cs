@@ -5,10 +5,14 @@ using blazor_wasm;
 using blazor_wasm.Services;
 using blazor_wasm.Handlers;
 using MudBlazor.Services;
+using System.Globalization;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
+
+// Configure Localization
+builder.Services.AddLocalization();
 
 // Get API URL from configuration
 var apiUrl = builder.Configuration["ApiUrl"] ?? "http://localhost:5001";
@@ -46,6 +50,11 @@ builder.Services.AddScoped(sp =>
 builder.Services.AddMudServices();
 
 var host = builder.Build();
+
+// Set German culture as default
+var culture = new CultureInfo("de-DE");
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 // Notify authentication state on app startup
 var authStateProvider = host.Services.GetRequiredService<CustomAuthStateProvider>();

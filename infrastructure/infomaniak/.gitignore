@@ -1,0 +1,5 @@
+# Environment variables with secrets
+.env
+
+# Deployment tracking (created during deployment)
+deployment.txt

@@ -1,0 +1,223 @@
+@page "/image-cleaner"
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Image Metadata Cleaner</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h3" GutterBottom="true">Image Metadata Cleaner</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">
+        Remove EXIF and other metadata from your images. All processing happens in your browser - no data is uploaded to any server.
+    </MudText>
+
+    <MudPaper Class="pa-4" Elevation="2">
+        <MudButton HtmlTag="label"
+                  Variant="Variant.Filled"
+                  Color="Color.Primary"
+                  StartIcon="@Icons.Material.Filled.CloudUpload">
+            Select Images
+            <InputFile id="fileInput" OnChange="HandleFilesChanged" multiple accept="image/*" hidden />
+        </MudButton>
+
+        @if (_files.Any())
+        {
+            <MudPaper Class="mt-4 pa-3" Outlined="true">
+                @foreach (var file in _files)
+                {
+                    <div class="d-flex align-center justify-space-between pa-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudIcon Icon="@Icons.Material.Filled.Image" />
+                            <MudText>@file.Name (@FormatFileSize(file.Size))</MudText>
+                        </div>
+                        @if (_processedImages.ContainsKey(file.Name))
+                        {
+                            <MudText Color="Color.Success" Typo="Typo.body2">✓ Processed</MudText>
+                        }
+                    </div>
+                    @if (file != _files.Last())
+                    {
+                        <MudDivider />
+                    }
+                }
+            </MudPaper>
+
+            <MudStack Row="true" Class="mt-4">
+                <MudButton Variant="Variant.Filled"
+                          Color="Color.Primary"
+                          OnClick="ProcessImages"
+                          Disabled="@_isProcessing"
+                          StartIcon="@Icons.Material.Filled.CleaningServices">
+                    @if (_isProcessing)
+                    {
+                        <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
+                        <span>Processing...</span>
+                    }
+                    else
+                    {
+                        <span>Clean Metadata</span>
+                    }
+                </MudButton>
+
+                @if (_processedImages.Any())
+                {
+                    <MudButton Variant="Variant.Outlined"
+                              Color="Color.Secondary"
+                              OnClick="DownloadAll"
+                              StartIcon="@Icons.Material.Filled.Download">
+                        Download All
+                    </MudButton>
+                }
+
+                <MudButton Variant="Variant.Text"
+                          Color="Color.Default"
+                          OnClick="Clear"
+                          StartIcon="@Icons.Material.Filled.Clear">
+                    Clear
+                </MudButton>
+            </MudStack>
+        }
+    </MudPaper>
+
+    @if (_processedImages.Any())
+    {
+        <MudPaper Class="pa-4 mt-4" Elevation="2">
+            <MudText Typo="Typo.h5" GutterBottom="true">Before & After Comparison</MudText>
+
+            @foreach (var (fileName, _) in _processedImages)
+            {
+                <MudPaper Class="pa-4 mt-3" Outlined="true">
+                    <MudText Typo="Typo.h6" GutterBottom="true">@fileName</MudText>
+
+                    <MudGrid>
+                        <MudItem xs="12" md="6">
+                            <MudPaper Class="pa-3" Elevation="0">
+                                <MudText Typo="Typo.subtitle1" Color="Color.Error" GutterBottom="true">
+                                    <strong>Original (With Metadata)</strong>
+                                </MudText>
+                                <img id="original-@fileName"
+                                     style="max-width: 100%; height: auto; border: 2px solid #f44336; border-radius: 4px;"
+                                     alt="Original @fileName" />
+                                <div id="original-info-@fileName" class="mt-2" style="font-size: 0.875rem;">
+                                    <MudText Typo="Typo.body2">Loading...</MudText>
+                                </div>
+                            </MudPaper>
+                        </MudItem>
+
+                        <MudItem xs="12" md="6">
+                            <MudPaper Class="pa-3" Elevation="0">
+                                <MudText Typo="Typo.subtitle1" Color="Color.Success" GutterBottom="true">
+                                    <strong>Cleaned (Metadata Removed)</strong>
+                                </MudText>
+                                <img id="cleaned-@fileName"
+                                     style="max-width: 100%; height: auto; border: 2px solid #4caf50; border-radius: 4px;"
+                                     alt="Cleaned @fileName" />
+                                <div id="cleaned-info-@fileName" class="mt-2" style="font-size: 0.875rem;">
+                                    <MudText Typo="Typo.body2">Processing...</MudText>
+                                </div>
+                            </MudPaper>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudStack Row="true" Class="mt-3" Justify="Justify.Center">
+                        <MudButton Size="Size.Small"
+                                  Variant="Variant.Filled"
+                                  Color="Color.Primary"
+                                  OnClick="@(() => DownloadImage(fileName))"
+                                  StartIcon="@Icons.Material.Filled.Download">
+                            Download Cleaned Image
+                        </MudButton>
+                    </MudStack>
+                </MudPaper>
+            }
+        </MudPaper>
+    }
+</MudContainer>
+
+@code {
+    private List<IBrowserFile> _files = new();
+    private Dictionary<string, bool> _processedImages = new();
+    private bool _isProcessing = false;
+
+    private void HandleFilesChanged(InputFileChangeEventArgs e)
+    {
+        _files.Clear();
+        _processedImages.Clear();
+
+        foreach (var file in e.GetMultipleFiles())
+        {
+            if (file.ContentType.StartsWith("image/"))
+            {
+                _files.Add(file);
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task ProcessImages()
+    {
+        _isProcessing = true;
+        StateHasChanged();
+
+        try
+        {
+            foreach (var file in _files)
+            {
+                // Read file into memory
+                var buffer = new byte[file.Size];
+                await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).ReadAsync(buffer);
+
+                // Convert to base64
+                var base64 = Convert.ToBase64String(buffer);
+                var dataUrl = $"data:{file.ContentType};base64,{base64}";
+
+                // Call JavaScript to strip metadata and get clean image
+                await JSRuntime.InvokeVoidAsync("imageMetadataCleaner.processImage", dataUrl, file.Name);
+
+                _processedImages[file.Name] = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error processing images: {ex.Message}");
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DownloadImage(string fileName)
+    {
+        await JSRuntime.InvokeVoidAsync("imageMetadataCleaner.downloadImage", fileName);
+    }
+
+    private async Task DownloadAll()
+    {
+        foreach (var fileName in _processedImages.Keys)
+        {
+            await DownloadImage(fileName);
+            await Task.Delay(100); // Small delay between downloads
+        }
+    }
+
+    private void Clear()
+    {
+        _files.Clear();
+        _processedImages.Clear();
+        StateHasChanged();
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+}

@@ -137,7 +137,7 @@ window.imageMetadataCleaner = {
                                 
                                 if (exifCount > 0) {
                                     exifHtml = '<div style="margin-top: 8px; padding: 8px; background: #fff3e0; border-radius: 4px;">';
-                                    exifHtml += `<strong style="color: #f44336;">Found ${exifCount} EXIF fields:</strong><br/>`;
+                                    exifHtml += `<strong style="color: #f44336;">Gefunden ${exifCount} EXIF-Felder:</strong><br/>`;
                                     exifHtml += '<div style="font-size: 0.8rem; margin-top: 4px; max-height: 200px; overflow-y: auto;">';
                                     
                                     Object.keys(exifData).forEach(key => {
@@ -153,29 +153,23 @@ window.imageMetadataCleaner = {
                                     
                                     exifHtml += '</div></div>';
                                 } else {
-                                    exifHtml = '<div style="color: #666; font-style: italic; margin-top: 4px;">No EXIF data found</div>';
+                                    exifHtml = '<div style="color: #666; font-style: italic; margin-top: 4px;">Keine EXIF-Daten gefunden</div>';
                                 }
                                 
                                 originalInfo.innerHTML = `
                                     <strong>Original:</strong><br/>
-                                    Size: ${window.imageMetadataCleaner.formatBytes(metadata.original.sizeWithMetadata)}<br/>
-                                    Dimensions: ${metadata.original.width} × ${metadata.original.height}
+                                    Abmessungen: ${metadata.original.width} × ${metadata.original.height}
                                     ${exifHtml}
                                 `;
                             }
 
                             const cleanedInfo = document.getElementById('cleaned-info-' + fileName);
                             if (cleanedInfo) {
-                                const sizeDiff = metadata.original.sizeWithMetadata - metadata.cleaned.sizeWithoutMetadata;
-                                const percentReduction = ((sizeDiff / metadata.original.sizeWithMetadata) * 100).toFixed(1);
-
                                 cleanedInfo.innerHTML = `
-                                    <strong>Cleaned:</strong><br/>
-                                    Size: ${window.imageMetadataCleaner.formatBytes(metadata.cleaned.sizeWithoutMetadata)}<br/>
-                                    Dimensions: ${metadata.cleaned.width} × ${metadata.cleaned.height}<br/>
+                                    <strong>Bereinigt:</strong><br/>
+                                    Abmessungen: ${metadata.cleaned.width} × ${metadata.cleaned.height}<br/>
                                     <div style="margin-top: 8px; padding: 8px; background: #e8f5e9; border-radius: 4px;">
-                                        <span style="color: #4caf50;">✓ All metadata removed</span><br/>
-                                        <span style="color: #2196f3;">Size reduced by ${percentReduction}%</span>
+                                        <span style="color: #4caf50;">✓ Alle Metadaten entfernt</span>
                                     </div>
                                 `;
                             }

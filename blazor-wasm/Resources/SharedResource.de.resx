@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Navigation -->
+  <data name="Nav.Home" xml:space="preserve">
+    <value>Startseite</value>
+  </data>
+  <data name="Nav.Counter" xml:space="preserve">
+    <value>Zähler</value>
+  </data>
+  <data name="Nav.Weather" xml:space="preserve">
+    <value>Wetter</value>
+  </data>
+  <data name="Nav.ImageCleaner" xml:space="preserve">
+    <value>Bild-Metadaten-Reiniger</value>
+  </data>
+  <data name="Nav.Events" xml:space="preserve">
+    <value>Ereignisse</value>
+  </data>
+  <data name="Nav.Problems" xml:space="preserve">
+    <value>Probleme</value>
+  </data>
+  <data name="Nav.Login" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="Nav.Register" xml:space="preserve">
+    <value>Registrieren</value>
+  </data>
+  <data name="Nav.Logout" xml:space="preserve">
+    <value>Abmelden</value>
+  </data>
+  <data name="Nav.MagicLinkLogin" xml:space="preserve">
+    <value>Magic Link Anmeldung</value>
+  </data>
+
+  <!-- Image Cleaner Page -->
+  <data name="ImageCleaner.Title" xml:space="preserve">
+    <value>Bild-Metadaten-Reiniger</value>
+  </data>
+  <data name="ImageCleaner.Description" xml:space="preserve">
+    <value>Entfernen Sie EXIF und andere Metadaten von Ihren Bildern. Die gesamte Verarbeitung erfolgt in Ihrem Browser - keine Daten werden auf einen Server hochgeladen.</value>
+  </data>
+  <data name="ImageCleaner.SelectImages" xml:space="preserve">
+    <value>Bilder auswählen</value>
+  </data>
+  <data name="ImageCleaner.Processed" xml:space="preserve">
+    <value>✓ Verarbeitet</value>
+  </data>
+  <data name="ImageCleaner.Processing" xml:space="preserve">
+    <value>Verarbeitung...</value>
+  </data>
+  <data name="ImageCleaner.CleanMetadata" xml:space="preserve">
+    <value>Metadaten bereinigen</value>
+  </data>
+  <data name="ImageCleaner.DownloadAll" xml:space="preserve">
+    <value>Alle herunterladen</value>
+  </data>
+  <data name="ImageCleaner.Clear" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="ImageCleaner.BeforeAfterComparison" xml:space="preserve">
+    <value>Vorher &amp; Nachher Vergleich</value>
+  </data>
+  <data name="ImageCleaner.OriginalWithMetadata" xml:space="preserve">
+    <value>Original (mit Metadaten)</value>
+  </data>
+  <data name="ImageCleaner.CleanedNoMetadata" xml:space="preserve">
+    <value>Bereinigt (Metadaten entfernt)</value>
+  </data>
+  <data name="ImageCleaner.DownloadCleanedImage" xml:space="preserve">
+    <value>Bereinigtes Bild herunterladen</value>
+  </data>
+  <data name="ImageCleaner.Loading" xml:space="preserve">
+    <value>Wird geladen...</value>
+  </data>
+  <data name="ImageCleaner.Original" xml:space="preserve">
+    <value>Original:</value>
+  </data>
+  <data name="ImageCleaner.Cleaned" xml:space="preserve">
+    <value>Bereinigt:</value>
+  </data>
+  <data name="ImageCleaner.Size" xml:space="preserve">
+    <value>Größe</value>
+  </data>
+  <data name="ImageCleaner.Dimensions" xml:space="preserve">
+    <value>Abmessungen</value>
+  </data>
+  <data name="ImageCleaner.FoundXExifFields" xml:space="preserve">
+    <value>Gefunden {0} EXIF-Felder:</value>
+  </data>
+  <data name="ImageCleaner.NoExifDataFound" xml:space="preserve">
+    <value>Keine EXIF-Daten gefunden</value>
+  </data>
+  <data name="ImageCleaner.AllMetadataRemoved" xml:space="preserve">
+    <value>✓ Alle Metadaten entfernt</value>
+  </data>
+  <data name="ImageCleaner.SizeReducedByX" xml:space="preserve">
+    <value>Größe um {0}% reduziert</value>
+  </data>
+
+  <!-- Common -->
+  <data name="Common.Download" xml:space="preserve">
+    <value>Herunterladen</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="Common.Edit" xml:space="preserve">
+    <value>Bearbeiten</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+</root>

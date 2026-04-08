@@ -1,12 +1,13 @@
 @page "/image-cleaner"
 @inject IJSRuntime JSRuntime
+@inject IStringLocalizer<blazor_wasm.Resources.SharedResource> Localizer
 
-<PageTitle>Image Metadata Cleaner</PageTitle>
+<PageTitle>@Localizer["ImageCleaner.Title"]</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-    <MudText Typo="Typo.h3" GutterBottom="true">Image Metadata Cleaner</MudText>
+    <MudText Typo="Typo.h3" GutterBottom="true">@Localizer["ImageCleaner.Title"]</MudText>
     <MudText Typo="Typo.body1" Class="mb-4">
-        Remove EXIF and other metadata from your images. All processing happens in your browser - no data is uploaded to any server.
+        @Localizer["ImageCleaner.Description"]
     </MudText>
 
     <MudPaper Class="pa-4" Elevation="2">
@@ -14,7 +15,7 @@
                   Variant="Variant.Filled"
                   Color="Color.Primary"
                   StartIcon="@Icons.Material.Filled.CloudUpload">
-            Select Images
+            @Localizer["ImageCleaner.SelectImages"]
             <InputFile id="fileInput" OnChange="HandleFilesChanged" multiple accept="image/*" hidden />
         </MudButton>
 
@@ -26,11 +27,11 @@
                     <div class="d-flex align-center justify-space-between pa-2">
                         <div class="d-flex align-center gap-2">
                             <MudIcon Icon="@Icons.Material.Filled.Image" />
-                            <MudText>@file.Name (@FormatFileSize(file.Size))</MudText>
+                            <MudText>@file.Name</MudText>
                         </div>
                         @if (_processedImages.ContainsKey(file.Name))
                         {
-                            <MudText Color="Color.Success" Typo="Typo.body2">✓ Processed</MudText>
+                            <MudText Color="Color.Success" Typo="Typo.body2">@Localizer["ImageCleaner.Processed"]</MudText>
                         }
                     </div>
                     @if (file != _files.Last())
@@ -49,11 +50,11 @@
                     @if (_isProcessing)
                     {
                         <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
-                        <span>Processing...</span>
+                        <span>@Localizer["ImageCleaner.Processing"]</span>
                     }
                     else
                     {
-                        <span>Clean Metadata</span>
+                        <span>@Localizer["ImageCleaner.CleanMetadata"]</span>
                     }
                 </MudButton>
 
@@ -63,7 +64,7 @@
                               Color="Color.Secondary"
                               OnClick="DownloadAll"
                               StartIcon="@Icons.Material.Filled.Download">
-                        Download All
+                        @Localizer["ImageCleaner.DownloadAll"]
                     </MudButton>
                 }
 
@@ -71,7 +72,7 @@
                           Color="Color.Default"
                           OnClick="Clear"
                           StartIcon="@Icons.Material.Filled.Clear">
-                    Clear
+                    @Localizer["ImageCleaner.Clear"]
                 </MudButton>
             </MudStack>
         }
@@ -80,7 +81,7 @@
     @if (_processedImages.Any())
     {
         <MudPaper Class="pa-4 mt-4" Elevation="2">
-            <MudText Typo="Typo.h5" GutterBottom="true">Before & After Comparison</MudText>
+            <MudText Typo="Typo.h5" GutterBottom="true">@Localizer["ImageCleaner.BeforeAfterComparison"]</MudText>
 
             @foreach (var (fileName, _) in _processedImages)
             {
@@ -91,13 +92,13 @@
                         <MudItem xs="12" md="6">
                             <MudPaper Class="pa-3" Elevation="0">
                                 <MudText Typo="Typo.subtitle1" Color="Color.Error" GutterBottom="true">
-                                    <strong>Original (With Metadata)</strong>
+                                    <strong>@Localizer["ImageCleaner.OriginalWithMetadata"]</strong>
                                 </MudText>
                                 <img id="original-@fileName"
                                      style="max-width: 100%; height: auto; border: 2px solid #f44336; border-radius: 4px;"
                                      alt="Original @fileName" />
                                 <div id="original-info-@fileName" class="mt-2" style="font-size: 0.875rem;">
-                                    <MudText Typo="Typo.body2">Loading...</MudText>
+                                    <MudText Typo="Typo.body2">@Localizer["ImageCleaner.Loading"]</MudText>
                                 </div>
                             </MudPaper>
                         </MudItem>
@@ -105,13 +106,13 @@
                         <MudItem xs="12" md="6">
                             <MudPaper Class="pa-3" Elevation="0">
                                 <MudText Typo="Typo.subtitle1" Color="Color.Success" GutterBottom="true">
-                                    <strong>Cleaned (Metadata Removed)</strong>
+                                    <strong>@Localizer["ImageCleaner.CleanedNoMetadata"]</strong>
                                 </MudText>
                                 <img id="cleaned-@fileName"
                                      style="max-width: 100%; height: auto; border: 2px solid #4caf50; border-radius: 4px;"
                                      alt="Cleaned @fileName" />
                                 <div id="cleaned-info-@fileName" class="mt-2" style="font-size: 0.875rem;">
-                                    <MudText Typo="Typo.body2">Processing...</MudText>
+                                    <MudText Typo="Typo.body2">@Localizer["ImageCleaner.Processing"]</MudText>
                                 </div>
                             </MudPaper>
                         </MudItem>
@@ -123,7 +124,7 @@
                                   Color="Color.Primary"
                                   OnClick="@(() => DownloadImage(fileName))"
                                   StartIcon="@Icons.Material.Filled.Download">
-                            Download Cleaned Image
+                            @Localizer["ImageCleaner.DownloadCleanedImage"]
                         </MudButton>
                     </MudStack>
                 </MudPaper>
@@ -170,10 +171,15 @@
                 var base64 = Convert.ToBase64String(buffer);
                 var dataUrl = $"data:{file.ContentType};base64,{base64}";
 
+                // Mark as processed first so the comparison section renders
+                _processedImages[file.Name] = true;
+                StateHasChanged(); // Force render of comparison section
+
+                // Small delay to let the DOM elements be created
+                await Task.Delay(50);
+
                 // Call JavaScript to strip metadata and get clean image
                 await JSRuntime.InvokeVoidAsync("imageMetadataCleaner.processImage", dataUrl, file.Name);
-
-                _processedImages[file.Name] = true;
             }
         }
         catch (Exception ex)

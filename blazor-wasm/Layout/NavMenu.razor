@@ -1,22 +1,24 @@
-﻿<MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <MudNavLink Href="/image-cleaner" Icon="@Icons.Material.Filled.Image">Image Cleaner</MudNavLink>
+﻿@inject IStringLocalizer<blazor_wasm.Resources.SharedResource> Localizer
+
+<MudNavMenu>
+    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">@Localizer["Nav.Home"]</MudNavLink>
+    <MudNavLink Href="/image-cleaner" Icon="@Icons.Material.Filled.Image">@Localizer["Nav.ImageCleaner"]</MudNavLink>
 
     <MudDivider Class="my-2" />
 
     <AuthorizeView>
         <Authorized>
-            <MudNavLink Href="/events" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
-            <MudNavLink Href="/problems" Icon="@Icons.Material.Filled.BugReport">Problems</MudNavLink>
+            <MudNavLink Href="/events" Icon="@Icons.Material.Filled.Event">@Localizer["Nav.Events"]</MudNavLink>
+            <MudNavLink Href="/problems" Icon="@Icons.Material.Filled.BugReport">@Localizer["Nav.Problems"]</MudNavLink>
 
             <MudDivider Class="my-2" />
 
-            <MudNavLink Href="/logout" Icon="@Icons.Material.Filled.Logout">Logout</MudNavLink>
+            <MudNavLink Href="/logout" Icon="@Icons.Material.Filled.Logout">@Localizer["Nav.Logout"]</MudNavLink>
         </Authorized>
         <NotAuthorized>
-            <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">Login</MudNavLink>
-            <MudNavLink Href="/register" Icon="@Icons.Material.Filled.PersonAdd">Register</MudNavLink>
-            <MudNavLink Href="/login2" Icon="@Icons.Material.Filled.Email">Magic Link Login</MudNavLink>
+            <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">@Localizer["Nav.Login"]</MudNavLink>
+            <MudNavLink Href="/register" Icon="@Icons.Material.Filled.PersonAdd">@Localizer["Nav.Register"]</MudNavLink>
+            <MudNavLink Href="/login2" Icon="@Icons.Material.Filled.Email">@Localizer["Nav.MagicLinkLogin"]</MudNavLink>
         </NotAuthorized>
     </AuthorizeView>
 </MudNavMenu>

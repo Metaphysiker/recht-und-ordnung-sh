@@ -63,10 +63,12 @@ The script will:
 
 ### First-Time Nginx Setup
 
-After the first deployment, set up nginx and SSL certificates on the server:
+After the first deployment, set up nginx and SSL certificates on the server.
+
+**As root user:**
 
 ```bash
-ssh deploy@84.234.19.192
+ssh root@84.234.19.192
 cd /home/deploy/recht-und-ordnung-sh
 ./nginx-setup.sh
 ```
@@ -80,13 +82,13 @@ Then set up SSL certificates with Certbot:
 
 ```bash
 # Frontend SSL
-sudo certbot --nginx -d recht-und-ordnung.sandro-raess.ch
+certbot --nginx -d recht-und-ordnung.sandro-raess.ch
 
 # API SSL
-sudo certbot --nginx -d recht-und-ordnung-api.sandro-raess.ch
+certbot --nginx -d recht-und-ordnung-api.sandro-raess.ch
 
 # Test auto-renewal
-sudo certbot renew --dry-run
+certbot renew --dry-run
 ```
 
 ## Manual Operations

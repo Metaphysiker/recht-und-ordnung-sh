@@ -6,12 +6,15 @@ using Microsoft.IdentityModel.Tokens;
 using webapi.Data;
 using webapi.Models;
 using webapi.Models.ModelsImpl;
+using webapi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Add PostgreSQL DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

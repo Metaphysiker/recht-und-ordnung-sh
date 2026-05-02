@@ -1,10 +1,13 @@
 #!/bin/sh
+set -e
 
-# Replace ApiUrl in appsettings.json with environment variable
-if [ -n "$API_URL" ]; then
-    echo "Setting ApiUrl to: $API_URL"
-    sed -i "s|\"ApiUrl\":.*|\"ApiUrl\": \"$API_URL\"|g" /usr/share/nginx/html/appsettings.json
-fi
+echo "Starting Blazor WebAssembly with API URL: $API_URL"
 
-# Start nginx
-nginx -g 'daemon off;'
+for file in /usr/share/nginx/html/appsettings*.json; do
+  if [ -f "$file" ]; then
+    echo "Updating $file"
+    sed -i "s|\"ApiUrl\"[[:space:]]*:[[:space:]]*\"[^\"]*\"|\"ApiUrl\": \"$API_URL\"|g" "$file"
+  fi
+done
+
+exec nginx -g 'daemon off;'

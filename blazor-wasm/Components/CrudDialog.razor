@@ -29,10 +29,11 @@
 </MudDialog>
 
 @code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
     [Parameter] public required TDto Model { get; set; }
     [Parameter] public required RenderFragment<TDto> FormContent { get; set; }
     [Parameter] public EventCallback<TDto> OnSubmit { get; set; }
-    [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public bool IsEditMode { get; set; }
     [Parameter] public string DialogTitle { get; set; } = "Item";
 
@@ -53,8 +54,5 @@
         }
     }
 
-    private async Task Cancel()
-    {
-        await OnCancel.InvokeAsync();
-    }
+    private void Cancel() => MudDialog.Cancel();
 }

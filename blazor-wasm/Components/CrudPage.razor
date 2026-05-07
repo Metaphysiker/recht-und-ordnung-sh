@@ -40,6 +40,7 @@
 
     private async Task OpenCreateDialog()
     {
+        IDialogReference? dialog = null;
         var newItem = CreateNewInstance();
         var parameters = new DialogParameters<CrudDialog<TDto>>
         {
@@ -48,18 +49,21 @@
             { x => x.DialogTitle, DialogTitle },
             { x => x.IsEditMode, false },
             { x => x.OnSubmit, EventCallback.Factory.Create<TDto>(this, async (item) => {
-                await HandleCreate(item);
-                await RefreshList();
-            })},
-            { x => x.OnCancel, EventCallback.Factory.Create(this, () => {})}
+                if (await HandleCreate(item))
+                {
+                    dialog?.Close();
+                    await RefreshList();
+                }
+            })}
         };
 
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        await DialogService.ShowAsync<CrudDialog<TDto>>($"Create {DialogTitle}", parameters, options);
+        dialog = await DialogService.ShowAsync<CrudDialog<TDto>>($"Create {DialogTitle}", parameters, options);
     }
 
     private async Task OpenEditDialog(TDto item)
     {
+        IDialogReference? dialog = null;
         var parameters = new DialogParameters<CrudDialog<TDto>>
         {
             { x => x.Model, item },
@@ -67,14 +71,16 @@
             { x => x.DialogTitle, DialogTitle },
             { x => x.IsEditMode, true },
             { x => x.OnSubmit, EventCallback.Factory.Create<TDto>(this, async (updatedItem) => {
-                await HandleUpdate(updatedItem);
-                await RefreshList();
-            })},
-            { x => x.OnCancel, EventCallback.Factory.Create(this, () => {})}
+                if (await HandleUpdate(updatedItem))
+                {
+                    dialog?.Close();
+                    await RefreshList();
+                }
+            })}
         };
 
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        await DialogService.ShowAsync<CrudDialog<TDto>>($"Edit {DialogTitle}", parameters, options);
+        dialog = await DialogService.ShowAsync<CrudDialog<TDto>>($"Edit {DialogTitle}", parameters, options);
     }
 
     private async Task ConfirmDelete(TDto item)
@@ -96,20 +102,19 @@
         }
     }
 
-    private async Task HandleCreate(TDto item)
+    private async Task<bool> HandleCreate(TDto item)
     {
         var result = await Service.CreateAsync(item);
         if (result != null)
         {
             Snackbar.Add($"{DialogTitle} created successfully", Severity.Success);
+            return true;
         }
-        else
-        {
-            Snackbar.Add($"Failed to create {DialogTitle.ToLower()}", Severity.Error);
-        }
+        Snackbar.Add($"Failed to create {DialogTitle.ToLower()}", Severity.Error);
+        return false;
     }
 
-    private async Task HandleUpdate(TDto item)
+    private async Task<bool> HandleUpdate(TDto item)
     {
         var id = GetId(item);
         if (id.HasValue)
@@ -118,12 +123,11 @@
             if (result != null)
             {
                 Snackbar.Add($"{DialogTitle} updated successfully", Severity.Success);
+                return true;
             }
-            else
-            {
-                Snackbar.Add($"Failed to update {DialogTitle.ToLower()}", Severity.Error);
-            }
+            Snackbar.Add($"Failed to update {DialogTitle.ToLower()}", Severity.Error);
         }
+        return false;
     }
 
     private async Task HandleDelete(TDto item)

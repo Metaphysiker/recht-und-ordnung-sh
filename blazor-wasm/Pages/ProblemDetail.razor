@@ -1,8 +1,10 @@
 @page "/problems/{Id:guid}"
 @using blazor_wasm.Models
 @using blazor_wasm.Services
+@using blazor_wasm.Components
 @inject ProblemService ProblemService
 @inject EventService EventService
+@inject IDialogService DialogService
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
@@ -59,6 +61,17 @@ else
     <AttachmentManager ParentId="@Id" ParentType="ParentType.Problem" />
 
     <MudDivider Class="mb-6 no-print" />
+
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudText Typo="Typo.h6">Events</MudText>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="AddEventAsync"
+                   Class="no-print">
+            Add Event
+        </MudButton>
+    </MudStack>
 
     @if (!_events.Any())
     {
@@ -127,6 +140,36 @@ else
         _events = eventResult?.Items?.ToList() ?? [];
 
         _loading = false;
+    }
+
+    private async Task AddEventAsync()
+    {
+        IDialogReference? dialog = null;
+        var newEvent = new EventDto { ProblemId = Id };
+        var parameters = new DialogParameters<CrudDialog<EventDto>>
+        {
+            { x => x.Model, newEvent },
+            { x => x.FormContent, (model) => @<EventForm Model="model" /> },
+            { x => x.DialogTitle, "Event" },
+            { x => x.IsEditMode, false },
+            { x => x.OnSubmit, EventCallback.Factory.Create<EventDto>(this, async (item) =>
+            {
+                await EventService.CreateAsync(item);
+                dialog?.Close();
+                var result = await EventService.SearchAsync(new EventSearchDto
+                {
+                    ProblemId = Id,
+                    PageSize = 1000,
+                    OrderBy = "EventDate",
+                    OrderDirection = OrderDirection.Ascending
+                });
+                _events = result?.Items?.ToList() ?? [];
+                StateHasChanged();
+            })}
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        dialog = await DialogService.ShowAsync<CrudDialog<EventDto>>("Create Event", parameters, options);
     }
 
     private async Task DownloadPdfAsync()

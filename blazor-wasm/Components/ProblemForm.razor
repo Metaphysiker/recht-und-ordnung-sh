@@ -4,11 +4,11 @@
               Required="true"
               Class="mb-4" />
 
-<MudTextField @bind-Value="Model.Description"
-              Label="Description"
-              Variant="Variant.Outlined"
-              Lines="5"
-              Class="mb-4" />
+<MudText Typo="Typo.subtitle2" Class="mb-1">Description</MudText>
+<div class="mb-4">
+    <RichTextEditor Value="@Model.Description"
+                    ValueChanged="@(v => Model.Description = v)" />
+</div>
 
 <MudText Typo="Typo.subtitle2" Class="mb-1">
     Location

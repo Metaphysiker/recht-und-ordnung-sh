@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Controllers;
 using webapi.Data;
+using webapi.Models.DTOs;
 using webapi.Models.DTOs.DTOsImpl;
 using webapi.Models.ModelsImpl;
 using QuestPDF.Fluent;
@@ -81,9 +82,14 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
         return query;
     }
 
+    [AllowAnonymous]
+    public override async Task<ActionResult<PaginationDto<ProblemDto>>> Search([FromBody] ProblemSearchDto search)
+        => await base.Search(search);
+
     /// <summary>
     /// Override GetById to include related Events
     /// </summary>
+    [AllowAnonymous]
     public override async Task<ActionResult<ProblemDto>> GetById(Guid id)
     {
         var entity = await _dbSet

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Controllers;
 using webapi.Data;
+using webapi.Models.DTOs;
 using webapi.Models.DTOs.DTOsImpl;
 using webapi.Models.ModelsImpl;
 using webapi.Search;
@@ -51,6 +52,14 @@ public class EventController : ModelDtoControllerBase<Event, EventDto, EventSear
             UserId = entity.UserId
         };
     }
+
+    [AllowAnonymous]
+    public override Task<ActionResult<PaginationDto<EventDto>>> Search([FromBody] EventSearchDto search)
+        => base.Search(search);
+
+    [AllowAnonymous]
+    public override Task<ActionResult<EventDto>> GetById(Guid id)
+        => base.GetById(id);
 
     /// <summary>
     /// Override to implement custom search logic

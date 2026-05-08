@@ -1,0 +1,87 @@
+@page "/public/problems/{Id:guid}"
+@layout PublicLayout
+@using blazor_wasm.Models
+@using blazor_wasm.Services
+@using blazor_wasm.Layout
+@inject ProblemService ProblemService
+@inject EventService EventService
+
+<PageTitle>@(_problem?.Title ?? "Problem")</PageTitle>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_problem == null)
+{
+    <MudAlert Severity="Severity.Error">Problem not found.</MudAlert>
+}
+else
+{
+    <MudText Typo="Typo.h4" GutterBottom="true">@_problem.Title</MudText>
+
+    @if (!string.IsNullOrWhiteSpace(_problem.Description))
+    {
+        <div class="mb-4">@((MarkupString)_problem.Description)</div>
+    }
+
+    @if (_problem.Coordinates.Count > 0)
+    {
+        <MudPaper Class="pa-3 mb-4" Elevation="1">
+            <LeafletMap Coordinates="_problem.Coordinates" Height="350px" />
+        </MudPaper>
+    }
+
+    <MudDivider Class="mb-4" />
+
+    <MudText Typo="Typo.h6" GutterBottom="true">Events</MudText>
+
+    @if (!_events.Any())
+    {
+        <MudText Typo="Typo.body2" Color="Color.Secondary">No events recorded for this problem.</MudText>
+    }
+    else
+    {
+        <MudTimeline TimelinePosition="TimelinePosition.Left">
+            @foreach (var evt in _events)
+            {
+                <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+                    <ItemContent>
+                        <MudPaper Elevation="2" Class="pa-3 mb-2">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">@evt.EventDate.ToString("g")</MudText>
+                            <MudText Typo="Typo.subtitle1"><strong>@evt.Title</strong></MudText>
+                            @if (!string.IsNullOrWhiteSpace(evt.Description))
+                            {
+                                <div class="mt-1">@((MarkupString)evt.Description)</div>
+                            }
+                        </MudPaper>
+                    </ItemContent>
+                </MudTimelineItem>
+            }
+        </MudTimeline>
+    }
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private ProblemDto? _problem;
+    private List<EventDto> _events = [];
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _problem = await ProblemService.GetByIdAsync(Id);
+
+        var result = await EventService.SearchAsync(new EventSearchDto
+        {
+            ProblemId = Id,
+            PageSize = 1000,
+            OrderBy = "EventDate",
+            OrderDirection = OrderDirection.Ascending
+        });
+        _events = result?.Items?.ToList() ?? [];
+
+        _loading = false;
+    }
+}

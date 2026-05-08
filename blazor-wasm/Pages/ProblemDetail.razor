@@ -1,0 +1,146 @@
+@page "/problems/{Id:guid}"
+@using blazor_wasm.Models
+@using blazor_wasm.Services
+@inject ProblemService ProblemService
+@inject EventService EventService
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@attribute [Authorize]
+
+<PageTitle>@(_problem?.Title ?? "Problem Detail")</PageTitle>
+
+<div class="no-print">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudButton StartIcon="@Icons.Material.Filled.ArrowBack"
+                   OnClick="@(() => Navigation.NavigateTo("/problems"))">
+            Back
+        </MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                   Disabled="_isDownloading"
+                   OnClick="DownloadPdfAsync">
+            @if (_isDownloading)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <span>Generating...</span>
+            }
+            else
+            {
+                <span>Save as PDF</span>
+            }
+        </MudButton>
+    </MudStack>
+</div>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_problem == null)
+{
+    <MudAlert Severity="Severity.Error">Problem not found.</MudAlert>
+}
+else
+{
+    <MudText Typo="Typo.h4" GutterBottom="true">@_problem.Title</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">@_problem.Description</MudText>
+
+    @if (_problem.Coordinates.Count > 0)
+    {
+        <MudPaper Class="pa-3 mb-4" Elevation="1">
+            <LeafletMap Coordinates="_problem.Coordinates" Height="350px" />
+        </MudPaper>
+    }
+
+    <MudDivider Class="mb-6 no-print" />
+
+    @if (!_events.Any())
+    {
+        <MudText Typo="Typo.body2" Color="Color.Secondary">No events recorded for this problem.</MudText>
+    }
+    else
+    {
+        <div class="screen-only">
+            <MudTimeline TimelinePosition="TimelinePosition.Left">
+                @foreach (var evt in _events)
+                {
+                    <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+                        <ItemContent>
+                            <MudPaper Elevation="2" Class="pa-3 mb-2">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@evt.EventDate.ToString("g")</MudText>
+                                <MudText Typo="Typo.subtitle1"><strong>@evt.Title</strong></MudText>
+                                @if (!string.IsNullOrWhiteSpace(evt.Description))
+                                {
+                                    <div class="mt-1">@((MarkupString)evt.Description)</div>
+                                }
+                            </MudPaper>
+                        </ItemContent>
+                    </MudTimelineItem>
+                }
+            </MudTimeline>
+        </div>
+
+        <div class="print-only">
+            <div class="print-timeline">
+                @foreach (var evt in _events)
+                {
+                    <div class="print-timeline-item">
+                        <span class="print-timeline-dot"></span>
+                        <div class="print-timeline-date">@evt.EventDate.ToString("g")</div>
+                        <div class="print-timeline-title">@evt.Title</div>
+                        @if (!string.IsNullOrWhiteSpace(evt.Description))
+                        {
+                            <div class="print-timeline-desc">@((MarkupString)evt.Description)</div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private ProblemDto? _problem;
+    private List<EventDto> _events = [];
+    private bool _loading = true;
+    private bool _isDownloading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _problem = await ProblemService.GetByIdAsync(Id);
+
+        var result = await EventService.SearchAsync(new EventSearchDto
+        {
+            ProblemId = Id,
+            PageSize = 1000,
+            OrderBy = "EventDate",
+            OrderDirection = OrderDirection.Ascending
+        });
+
+        _events = result?.Items?.ToList() ?? [];
+        _loading = false;
+    }
+
+    private async Task DownloadPdfAsync()
+    {
+        _isDownloading = true;
+        try
+        {
+            var response = await Http.GetAsync($"api/Problem/{Id}/pdf");
+            if (response.IsSuccessStatusCode)
+            {
+                var bytes = await response.Content.ReadAsByteArrayAsync();
+                var filename = $"{_problem?.Title ?? "problem"}.pdf";
+                await JS.InvokeVoidAsync("downloadFile", filename, "application/pdf", bytes);
+            }
+        }
+        finally
+        {
+            _isDownloading = false;
+        }
+    }
+}

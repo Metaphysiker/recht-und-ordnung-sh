@@ -9,10 +9,8 @@ public class ProblemDto : IDto
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 
-    // Collection of related Event IDs
     public List<Guid> EventIds { get; set; } = new List<Guid>();
-    
-    // User relationship
+    public List<CoordinateDto> Coordinates { get; set; } = [];
     public Guid? UserId { get; set; }
 
     string IDto.GenericName { get; set; } = string.Empty;

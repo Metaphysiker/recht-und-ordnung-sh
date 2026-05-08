@@ -1,0 +1,93 @@
+<MudTextField @bind-Value="Model.Title"
+              Label="Title"
+              Variant="Variant.Outlined"
+              Required="true"
+              Class="mb-4" />
+
+<MudTextField @bind-Value="Model.Description"
+              Label="Description"
+              Variant="Variant.Outlined"
+              Lines="5"
+              Class="mb-4" />
+
+<MudText Typo="Typo.subtitle2" Class="mb-1">
+    Location
+    <MudText Typo="Typo.caption" Color="Color.Secondary" Inline="true"> — click map to add points</MudText>
+</MudText>
+
+<LeafletMap Coordinates="Model.Coordinates"
+            Editable="true"
+            Height="280px"
+            OnMapClick="AddCoordinate"
+            OnMarkerClick="RemoveCoordinate" />
+
+@if (Model.Coordinates.Count > 0)
+{
+    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1 mb-1">
+        @CoordinateHint
+    </MudText>
+
+    <MudSimpleTable Hover="true" Dense="true" Class="mt-2 mb-2">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Coordinates.Count; i++)
+            {
+                var index = i;
+                var coord = Model.Coordinates[index];
+                <tr>
+                    <td>@(index + 1)</td>
+                    <td>@coord.Latitude.ToString("F6")</td>
+                    <td>@coord.Longitude.ToString("F6")</td>
+                    <td>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="@(() => RemoveCoordinate(index))" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </MudSimpleTable>
+
+    <MudButton StartIcon="@Icons.Material.Filled.Clear"
+               Size="Size.Small"
+               OnClick="ClearCoordinates">
+        Clear all
+    </MudButton>
+}
+
+@code {
+    [Parameter] public required ProblemDto Model { get; set; }
+
+    private string CoordinateHint => Model.Coordinates.Count switch
+    {
+        1 => "1 point — pin",
+        2 => "2 points — line",
+        _ => $"{Model.Coordinates.Count} points — area"
+    };
+
+    private void AddCoordinate(CoordinateDto coord)
+    {
+        Model.Coordinates.Add(coord);
+        StateHasChanged();
+    }
+
+    private void RemoveCoordinate(int index)
+    {
+        Model.Coordinates.RemoveAt(index);
+        StateHasChanged();
+    }
+
+    private void ClearCoordinates()
+    {
+        Model.Coordinates.Clear();
+        StateHasChanged();
+    }
+}

@@ -5,6 +5,8 @@ using webapi.Controllers;
 using webapi.Data;
 using webapi.Models.DTOs.DTOsImpl;
 using webapi.Models.ModelsImpl;
+using QuestPDF.Fluent;
+using webapi.Pdf;
 using webapi.Search;
 
 namespace webapi.Controllers.ControllersImpl;
@@ -30,9 +32,9 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
         entity.Title = dto.Title;
         entity.Description = dto.Description;
         entity.UserId = dto.UserId;
-
-        // Note: Event relationships are managed separately through the Event controller
-        // The EventIds in the DTO are used for reading, not for writing
+        entity.Coordinates = dto.Coordinates
+            .Select(c => new Coordinate { Latitude = c.Latitude, Longitude = c.Longitude })
+            .ToList();
 
         return entity;
     }
@@ -48,6 +50,9 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
             Title = entity.Title,
             Description = entity.Description,
             EventIds = entity.Events.Select(e => e.Id).ToList(),
+            Coordinates = entity.Coordinates
+                .Select(c => new CoordinateDto { Latitude = c.Latitude, Longitude = c.Longitude })
+                .ToList(),
             UserId = entity.UserId
         };
     }
@@ -85,5 +90,31 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
         }
 
         return Ok(MapToDto(entity));
+    }
+
+    /// <summary>
+    /// Generate a PDF report for a problem including its events
+    /// </summary>
+    [HttpGet("{id}/pdf")]
+    public async Task<IActionResult> GetPdf(Guid id)
+    {
+        var problem = await _dbSet
+            .Include(p => p.Events)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (problem == null)
+            return NotFound();
+
+        var events = problem.Events.OrderBy(e => e.EventDate).ToList();
+
+        byte[]? mapImage = null;
+        if (problem.Coordinates.Count > 0)
+            mapImage = await MapImageGenerator.GenerateAsync(problem.Coordinates);
+
+        var document = new ProblemPdfDocument(problem, events, mapImage);
+        var pdfBytes = document.GeneratePdf();
+
+        var filename = $"{problem.Title.Replace(" ", "_")}.pdf";
+        return File(pdfBytes, "application/pdf", filename);
     }
 }

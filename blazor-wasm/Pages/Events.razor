@@ -20,6 +20,8 @@
           SearchFilters="@EventSearchFilters" />
 
 @code {
+    private static string StripHtml(string html) =>
+        string.IsNullOrEmpty(html) ? "" : System.Text.RegularExpressions.Regex.Replace(html, "<[^>]*>", "");
     private RenderFragment EventTableHeaders =>
         @<text>
             <MudTh>Title</MudTh>
@@ -33,7 +35,7 @@
             <MudTd DataLabel="Title">@item.Title</MudTd>
             <MudTd DataLabel="Event Date">@item.EventDate.ToString("g")</MudTd>
             <MudTd DataLabel="Description">
-                @(item.Description.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description)
+                @(StripHtml(item.Description) is { } plain && plain.Length > 80 ? plain[..80] + "…" : StripHtml(item.Description))
             </MudTd>
         </text>;
 

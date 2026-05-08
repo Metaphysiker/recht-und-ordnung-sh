@@ -1,0 +1,48 @@
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div id="@_mapId" style="height: @Height; width: 100%; border-radius: 4px; z-index: 0;"></div>
+
+@code {
+    [Parameter] public List<CoordinateDto> Coordinates { get; set; } = [];
+    [Parameter] public EventCallback<CoordinateDto> OnMapClick { get; set; }
+    [Parameter] public EventCallback<int> OnMarkerClick { get; set; }
+    [Parameter] public bool Editable { get; set; }
+    [Parameter] public string Height { get; set; } = "350px";
+
+    private readonly string _mapId = $"map-{Guid.NewGuid():N}";
+    private DotNetObjectReference<LeafletMap>? _dotNetRef;
+    private bool _initialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("LeafletMap.initialize", _mapId, Coordinates, Editable, _dotNetRef);
+            _initialized = true;
+        }
+        else if (_initialized)
+        {
+            await JS.InvokeVoidAsync("LeafletMap.update", _mapId, Coordinates);
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleMapClick(double lat, double lng)
+    {
+        await OnMapClick.InvokeAsync(new CoordinateDto { Latitude = lat, Longitude = lng });
+    }
+
+    [JSInvokable]
+    public async Task HandleMarkerClick(int index)
+    {
+        await OnMarkerClick.InvokeAsync(index);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try { await JS.InvokeVoidAsync("LeafletMap.destroy", _mapId); } catch { }
+        _dotNetRef?.Dispose();
+    }
+}

@@ -1,0 +1,41 @@
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div id="@_editorId" style="min-height: 120px;"></div>
+
+@code {
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private readonly string _editorId = $"quill-{Guid.NewGuid():N}";
+    private DotNetObjectReference<RichTextEditor>? _dotNetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("RichTextEditor.initialize", _editorId, _dotNetRef, Value);
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnContentChanged(string content)
+    {
+        if (Value != content)
+        {
+            Value = content;
+            await ValueChanged.InvokeAsync(content);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("RichTextEditor.destroy", _editorId);
+        }
+        catch { }
+        _dotNetRef?.Dispose();
+    }
+}

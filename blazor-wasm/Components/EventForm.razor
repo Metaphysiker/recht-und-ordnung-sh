@@ -17,11 +17,8 @@
                    AmPm="false" />
 </MudStack>
 
-<MudTextField @bind-Value="Model.Description"
-              Label="Description"
-              Variant="Variant.Outlined"
-              Lines="3"
-              Class="mb-4" />
+<MudText Typo="Typo.caption" Class="mb-1 mt-2">Description</MudText>
+<RichTextEditor @bind-Value="Model.Description" />
 
 <ProblemSelectorField @bind-ProblemId="Model.ProblemId" />
 

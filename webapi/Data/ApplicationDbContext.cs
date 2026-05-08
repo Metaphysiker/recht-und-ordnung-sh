@@ -24,10 +24,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     {
         base.OnModelCreating(builder);
 
-        // Customize table names if needed
         builder.Entity<ApplicationUser>(entity =>
         {
             entity.ToTable("Users");
         });
+
+        builder.Entity<Problem>().OwnsMany(p => p.Coordinates, b => b.ToJson());
     }
 }

@@ -29,7 +29,9 @@
 
     private RenderFragment<ProblemDto> ProblemRow => (item) =>
         @<text>
-            <MudTd DataLabel="Title">@item.Title</MudTd>
+            <MudTd DataLabel="Title">
+                <MudLink Href="@($"/problems/{item.Id}")">@item.Title</MudLink>
+            </MudTd>
             <MudTd DataLabel="Description">
                 @(item.Description.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description)
             </MudTd>
@@ -37,17 +39,5 @@
         </text>;
 
     private RenderFragment<ProblemDto> ProblemForm => (model) =>
-        @<text>
-            <MudTextField @bind-Value="model.Title"
-                          Label="Title"
-                          Variant="Variant.Outlined"
-                          Required="true"
-                          Class="mb-4" />
-
-            <MudTextField @bind-Value="model.Description"
-                          Label="Description"
-                          Variant="Variant.Outlined"
-                          Lines="5"
-                          Class="mb-4" />
-        </text>;
+        @<ProblemForm Model="model" />;
 }

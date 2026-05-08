@@ -1,0 +1,30 @@
+<MudTextField @bind-Value="Model.Title"
+              Label="Title"
+              Variant="Variant.Outlined"
+              Required="true"
+              Class="mb-4" />
+
+<MudStack Row="true" Spacing="2" Class="mb-4">
+    <MudDatePicker Date="@Model.EventDate.UtcDateTime"
+                   DateChanged="@(d => Model.EventDate = d.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(d.Value.Date + Model.EventDate.UtcDateTime.TimeOfDay, DateTimeKind.Utc)) : Model.EventDate)"
+                   Label="Date (UTC)"
+                   Variant="Variant.Outlined"
+                   Required="true" />
+    <MudTimePicker Time="@Model.EventDate.UtcDateTime.TimeOfDay"
+                   TimeChanged="@(t => Model.EventDate = t.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(Model.EventDate.UtcDateTime.Date + t.Value, DateTimeKind.Utc)) : Model.EventDate)"
+                   Label="Time (UTC)"
+                   Variant="Variant.Outlined"
+                   AmPm="false" />
+</MudStack>
+
+<MudTextField @bind-Value="Model.Description"
+              Label="Description"
+              Variant="Variant.Outlined"
+              Lines="3"
+              Class="mb-4" />
+
+<ProblemSelectorField @bind-ProblemId="Model.ProblemId" />
+
+@code {
+    [Parameter] public required EventDto Model { get; set; }
+}

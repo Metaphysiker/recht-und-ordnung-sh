@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(docker-compose ps *)"
+      "Bash(docker-compose ps *)",
+      "Bash(dotnet build *)",
+      "Bash(sudo lsof -i :1025)",
+      "Bash(sudo fuser 1025/tcp)",
+      "Bash(docker stop *)"
     ]
   }
 }

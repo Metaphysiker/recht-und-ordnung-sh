@@ -1,0 +1,39 @@
+@inject ProblemService ProblemService
+
+<MudDialog>
+    <DialogContent>
+        <CrudSearchList TDto="ProblemDto"
+                        TSearchDto="ProblemSearchDto"
+                        Title="Problems"
+                        Service="@ProblemService"
+                        TableHeaders="@ProblemTableHeaders"
+                        RowTemplate="@ProblemRow"
+                        CanCreate="false"
+                        CanEdit="false"
+                        CanDelete="false"
+                        CanSelect="true"
+                        OnSelectClicked="OnProblemSelected" />
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    private RenderFragment ProblemTableHeaders =>
+        @<text>
+            <MudTh>Title</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh></MudTh>
+        </text>;
+
+    private RenderFragment<ProblemDto> ProblemRow => (item) =>
+        @<text>
+            <MudTd DataLabel="Title">@item.Title</MudTd>
+            <MudTd DataLabel="Description">@(item.Description.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description)</MudTd>
+        </text>;
+
+    private void OnProblemSelected(HashSet<ProblemDto> problems)
+    {
+        MudDialog.Close(DialogResult.Ok(problems.FirstOrDefault()));
+    }
+}

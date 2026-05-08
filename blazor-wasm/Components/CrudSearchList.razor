@@ -51,10 +51,30 @@
                     @TableHeaders
                 </HeaderContent>
                 <RowTemplate>
-                    @RowTemplate(context)
-                    @if (CanEdit || CanDelete)
+                    @RowTemplate?.Invoke(context)
+                    @if (CanEdit || CanDelete || CanSelect)
                     {
                         <MudTd Style="text-align: right;">
+                            @if (CanSelect)
+                            {
+                                if (MultiSelect)
+                                {
+                                    <MudCheckBox
+                                        Value="@_selectedItems.Contains(context)"
+                                        ValueChanged="@(async (bool v) => await ToggleSelectionAsync(context, v))"
+                                        Size="Size.Small"
+                                    ></MudCheckBox>
+                                }
+                                else
+                                {
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="Color.Primary"
+                                               Size="Size.Small"
+                                               OnClick="@(() => OnSelectClicked.InvokeAsync(new HashSet<TDto> { context }))">
+                                        Select
+                                    </MudButton>
+                                }
+                            }
                             @if (CanEdit)
                             {
                                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
@@ -107,6 +127,9 @@
     [Parameter] public bool CanCreate { get; set; } = true;
     [Parameter] public bool CanEdit { get; set; } = true;
     [Parameter] public bool CanDelete { get; set; } = true;
+    [Parameter] public bool CanSelect { get; set; } = false;
+    [Parameter] public bool MultiSelect { get; set; } = false;
+    [Parameter] public EventCallback<HashSet<TDto>> OnSelectClicked { get; set; }
     [Parameter] public int PageSize { get; set; } = 10;
 
     private PaginationDto<TDto>? _paginationResult;
@@ -114,6 +137,7 @@
     private string? _searchTerm;
     private int _currentPage = 0;
     private TSearchDto CurrentSearchDto { get; set; } = new();
+    private HashSet<TDto> _selectedItems = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -141,5 +165,12 @@
     {
         _currentPage = page - 1; // MudPagination uses 1-based indexing
         await SearchAsync();
+    }
+
+    private async Task ToggleSelectionAsync(TDto item, bool selected)
+    {
+        if (selected) _selectedItems.Add(item);
+        else _selectedItems.Remove(item);
+        await OnSelectClicked.InvokeAsync(_selectedItems);
     }
 }

@@ -1,0 +1,61 @@
+@inject ProblemService ProblemService
+@inject IDialogService DialogService
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+    <div style="flex: 1">
+        <MudTextField Value="@(_selectedProblem?.Title ?? (ProblemId.HasValue ? "Loading..." : string.Empty))"
+                      Label="Problem"
+                      Variant="Variant.Outlined"
+                      ReadOnly="true"
+                      Adornment="@(ProblemId.HasValue ? Adornment.End : Adornment.None)"
+                      AdornmentIcon="@Icons.Material.Filled.Clear"
+                      OnAdornmentClick="ClearProblem" />
+    </div>
+    <MudButton Variant="Variant.Outlined"
+               StartIcon="@Icons.Material.Filled.Search"
+               OnClick="OpenProblemPicker">
+        Select
+    </MudButton>
+</MudStack>
+
+@code {
+    [Parameter] public Guid? ProblemId { get; set; }
+    [Parameter] public EventCallback<Guid?> ProblemIdChanged { get; set; }
+
+    private ProblemDto? _selectedProblem;
+    private Guid? _loadedId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ProblemId.HasValue && ProblemId != _loadedId)
+        {
+            _selectedProblem = await ProblemService.GetByIdAsync(ProblemId.Value);
+            _loadedId = ProblemId;
+        }
+        else if (!ProblemId.HasValue)
+        {
+            _selectedProblem = null;
+            _loadedId = null;
+        }
+    }
+
+    private async Task OpenProblemPicker()
+    {
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseOnEscapeKey = true };
+        var dialog = await DialogService.ShowAsync<ProblemPickerDialog>("Select Problem", options);
+        var result = await dialog.Result;
+        if (result != null && !result.Canceled && result.Data is ProblemDto problem)
+        {
+            _selectedProblem = problem;
+            _loadedId = problem.Id;
+            await ProblemIdChanged.InvokeAsync(problem.Id);
+        }
+    }
+
+    private async Task ClearProblem()
+    {
+        _selectedProblem = null;
+        _loadedId = null;
+        await ProblemIdChanged.InvokeAsync(null);
+    }
+}

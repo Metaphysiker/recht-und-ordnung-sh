@@ -14,7 +14,7 @@
           Service="@EventService"
           CreateNewInstance="@(() => new EventDto())"
           GetId="@(item => item.Id)"
-          FormContent="@EventForm"
+          FormContent="@EventFormContent"
           TableHeaders="@EventTableHeaders"
           RowTemplate="@EventRow"
           SearchFilters="@EventSearchFilters" />
@@ -37,33 +37,8 @@
             </MudTd>
         </text>;
 
-private RenderFragment<EventDto> EventForm => (model) =>
-        @<text>
-            <MudTextField @bind-Value="model.Title"
-                          Label="Title"
-                          Variant="Variant.Outlined"
-                          Required="true"
-                          Class="mb-4" />
-
-            <MudStack Row="true" Spacing="2" Class="mb-4">
-                <MudDatePicker Date="@model.EventDate.UtcDateTime"
-                               DateChanged="@(d => model.EventDate = d.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(d.Value.Date + model.EventDate.UtcDateTime.TimeOfDay, DateTimeKind.Utc)) : model.EventDate)"
-                               Label="Date (UTC)"
-                               Variant="Variant.Outlined"
-                               Required="true" />
-                <MudTimePicker Time="@model.EventDate.UtcDateTime.TimeOfDay"
-                               TimeChanged="@(t => model.EventDate = t.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(model.EventDate.UtcDateTime.Date + t.Value, DateTimeKind.Utc)) : model.EventDate)"
-                               Label="Time (UTC)"
-                               Variant="Variant.Outlined"
-                               AmPm="false" />
-            </MudStack>
-
-            <MudTextField @bind-Value="model.Description"
-                          Label="Description"
-                          Variant="Variant.Outlined"
-                          Lines="3"
-                          Class="mb-4" />
-        </text>;
+    private RenderFragment<EventDto> EventFormContent => (model) =>
+            @<EventForm Model="model" />;
 
     private RenderFragment<EventSearchDto> EventSearchFilters => (search) =>
         @<MudStack Row="true" Spacing="2">

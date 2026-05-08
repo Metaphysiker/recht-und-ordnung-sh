@@ -12,16 +12,18 @@ public class ProblemPdfDocument : IDocument
     private readonly Problem _problem;
     private readonly List<Event> _events;
     private readonly byte[]? _mapImage;
+    private readonly List<(string FileName, byte[] Data)> _images;
 
     private static readonly Color PrimaryColor = Color.FromHex("#1565C0");
     private static readonly Color TextSecondary = Color.FromHex("#757575");
     private static readonly Color DividerColor = Color.FromHex("#E0E0E0");
 
-    public ProblemPdfDocument(Problem problem, List<Event> events, byte[]? mapImage = null)
+    public ProblemPdfDocument(Problem problem, List<Event> events, byte[]? mapImage = null, List<(string FileName, byte[] Data)>? images = null)
     {
         _problem = problem;
         _events = events;
         _mapImage = mapImage;
+        _images = images ?? [];
     }
 
     public void Compose(IDocumentContainer container)
@@ -108,6 +110,51 @@ public class ProblemPdfDocument : IDocument
                     col.Item().Element(c => ComposeEvent(c, evt));
                 }
             }
+
+            if (_images.Count > 0)
+            {
+                col.Item().PaddingTop(4).LineHorizontal(1).LineColor(DividerColor);
+
+                col.Item()
+                    .Text("Bilder")
+                    .FontSize(14)
+                    .Bold();
+
+                col.Item().Table(table =>
+                {
+                    table.ColumnsDefinition(cols =>
+                    {
+                        cols.RelativeColumn();
+                        cols.RelativeColumn();
+                    });
+
+                    for (int i = 0; i < _images.Count; i += 2)
+                    {
+                        AddImageCell(table, _images[i]);
+                        if (i + 1 < _images.Count)
+                            AddImageCell(table, _images[i + 1]);
+                        else
+                            table.Cell();
+                    }
+                });
+            }
+        });
+    }
+
+    private static void AddImageCell(TableDescriptor table, (string FileName, byte[] Data) image)
+    {
+        table.Cell().Padding(4).Column(col =>
+        {
+            col.Item()
+                .Border(1)
+                .BorderColor(Color.FromHex("#E0E0E0"))
+                .Image(image.Data)
+                .FitWidth();
+            col.Item()
+                .PaddingTop(2)
+                .Text(image.FileName)
+                .FontSize(8)
+                .FontColor(Color.FromHex("#757575"));
         });
     }
 

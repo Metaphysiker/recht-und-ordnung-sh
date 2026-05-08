@@ -56,6 +56,10 @@ else
 
     <MudDivider Class="mb-6 no-print" />
 
+    <AttachmentManager ParentId="@Id" ParentType="ParentType.Problem" />
+
+    <MudDivider Class="mb-6 no-print" />
+
     @if (!_events.Any())
     {
         <MudText Typo="Typo.body2" Color="Color.Secondary">No events recorded for this problem.</MudText>
@@ -113,15 +117,15 @@ else
     {
         _problem = await ProblemService.GetByIdAsync(Id);
 
-        var result = await EventService.SearchAsync(new EventSearchDto
+        var eventResult = await EventService.SearchAsync(new EventSearchDto
         {
             ProblemId = Id,
             PageSize = 1000,
             OrderBy = "EventDate",
             OrderDirection = OrderDirection.Ascending
         });
+        _events = eventResult?.Items?.ToList() ?? [];
 
-        _events = result?.Items?.ToList() ?? [];
         _loading = false;
     }
 

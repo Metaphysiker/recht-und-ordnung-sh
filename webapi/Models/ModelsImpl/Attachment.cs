@@ -11,6 +11,8 @@ public class Attachment : IModel, IEntityWithUser
     public long FileSizeBytes { get; set; }
     public Guid? ProblemId { get; set; }
     public Problem? Problem { get; set; }
+    public Guid? EventId { get; set; }
+    public Event? Event { get; set; }
     public ApplicationUser? User { get; set; }
     public Guid? UserId { get; set; }
 }

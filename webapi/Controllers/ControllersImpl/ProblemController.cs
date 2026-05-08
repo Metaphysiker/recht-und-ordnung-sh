@@ -8,6 +8,7 @@ using webapi.Models.ModelsImpl;
 using QuestPDF.Fluent;
 using webapi.Pdf;
 using webapi.Search;
+using webapi.Services;
 
 namespace webapi.Controllers.ControllersImpl;
 
@@ -18,8 +19,13 @@ namespace webapi.Controllers.ControllersImpl;
 [Route("api/[controller]")]
 public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, ProblemSearchDto>
 {
-    public ProblemController(ApplicationDbContext context) : base(context)
+    private readonly IS3Service _s3;
+    private readonly ILogger<ProblemController> _logger;
+
+    public ProblemController(ApplicationDbContext context, IS3Service s3, ILogger<ProblemController> logger) : base(context)
     {
+        _s3 = s3;
+        _logger = logger;
     }
 
     /// <summary>
@@ -100,6 +106,7 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
     {
         var problem = await _dbSet
             .Include(p => p.Events)
+            .Include(p => p.Attachments)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (problem == null)
@@ -111,10 +118,44 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
         if (problem.Coordinates.Count > 0)
             mapImage = await MapImageGenerator.GenerateAsync(problem.Coordinates);
 
-        var document = new ProblemPdfDocument(problem, events, mapImage);
+        _logger.LogInformation("PDF: problem has {Count} attachments: {Types}",
+            problem.Attachments.Count,
+            string.Join(", ", problem.Attachments.Select(a => $"{a.FileName}={a.ContentType}")));
+
+        var imageAttachments = problem.Attachments
+            .Where(a => a.ContentType.StartsWith("image/") || IsImageFile(a.FileName))
+            .OrderBy(a => a.CreatedAt)
+            .ToList();
+
+        _logger.LogInformation("PDF: {Count} image attachments after filter", imageAttachments.Count);
+
+        var images = (await Task.WhenAll(
+            imageAttachments.Select(async a =>
+            {
+                using var stream = await _s3.DownloadAsync(a.S3Key);
+                var data = ReadToBytes(stream);
+                _logger.LogInformation("PDF: downloaded {File} — {Bytes} bytes", a.FileName, data.Length);
+                return (a.FileName, Data: data);
+            })
+        )).ToList();
+
+        var document = new ProblemPdfDocument(problem, events, mapImage, images);
         var pdfBytes = document.GeneratePdf();
 
         var filename = $"{problem.Title.Replace(" ", "_")}.pdf";
         return File(pdfBytes, "application/pdf", filename);
     }
+
+    private static byte[] ReadToBytes(Stream stream)
+    {
+        using var ms = new MemoryStream();
+        stream.CopyTo(ms);
+        return ms.ToArray();
+    }
+
+    private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+        { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff", ".tif" };
+
+    private static bool IsImageFile(string fileName) =>
+        ImageExtensions.Contains(Path.GetExtension(fileName));
 }

@@ -1,0 +1,98 @@
+@inject AttachmentService AttachmentService
+@inject IJSRuntime JS
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
+    <MudText Typo="Typo.h6" Class="flex-grow-1">Attachments</MudText>
+    <MudFileUpload T="IBrowserFile" FilesChanged="UploadAsync" Accept="*/*">
+        <ActivatorContent>
+            <MudButton Variant="Variant.Outlined"
+                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                       Disabled="_isUploading">
+                @(_isUploading ? "Uploading..." : "Upload File")
+            </MudButton>
+        </ActivatorContent>
+    </MudFileUpload>
+</MudStack>
+
+@if (_attachments.Any())
+{
+    <MudPaper Elevation="1" Class="mb-4">
+        <MudList T="AttachmentDto">
+            @foreach (var attachment in _attachments)
+            {
+                <MudListItem>
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudIcon Icon="@Icons.Material.Filled.AttachFile" Class="mr-2" />
+                        <MudText Class="flex-grow-1">
+                            @attachment.FileName
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Inline="true">
+                                (@FormatBytes(attachment.FileSizeBytes))
+                            </MudText>
+                        </MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Download"
+                                       title="Download"
+                                       OnClick="@(() => DownloadAsync(attachment))" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       title="Delete"
+                                       OnClick="@(() => DeleteAsync(attachment))" />
+                    </MudStack>
+                </MudListItem>
+            }
+        </MudList>
+    </MudPaper>
+}
+
+@code {
+    [Parameter, EditorRequired] public Guid ParentId { get; set; }
+    [Parameter, EditorRequired] public ParentType ParentType { get; set; }
+
+    private List<AttachmentDto> _attachments = [];
+    private bool _isUploading;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var search = new AttachmentSearchDto
+        {
+            PageSize = 1000,
+            OrderBy = "CreatedAt",
+            OrderDirection = OrderDirection.Ascending,
+            ProblemId = ParentType == ParentType.Problem ? ParentId : null,
+            EventId = ParentType == ParentType.Event ? ParentId : null,
+        };
+        var result = await AttachmentService.SearchAsync(search);
+        _attachments = result?.Items?.ToList() ?? [];
+    }
+
+    private async Task UploadAsync(IBrowserFile file)
+    {
+        _isUploading = true;
+        var uploaded = await AttachmentService.UploadAsync(file, ParentId, ParentType);
+        if (uploaded != null)
+            await LoadAsync();
+        _isUploading = false;
+    }
+
+    private async Task DownloadAsync(AttachmentDto attachment)
+    {
+        var bytes = await AttachmentService.DownloadAsync(attachment.Id!.Value);
+        if (bytes != null)
+            await JS.InvokeVoidAsync("downloadFile", attachment.FileName, attachment.ContentType, bytes);
+    }
+
+    private async Task DeleteAsync(AttachmentDto attachment)
+    {
+        var deleted = await AttachmentService.DeleteAsync(attachment.Id!.Value);
+        if (deleted)
+            _attachments.Remove(attachment);
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / (1024.0 * 1024):F1} MB";
+    }
+}

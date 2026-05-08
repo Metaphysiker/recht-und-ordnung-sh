@@ -23,6 +23,7 @@ builder.Services.AddScoped<AuthService>();
 // Register CRUD services
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<ProblemService>();
+builder.Services.AddScoped<AttachmentService>();
 
 // Register custom AuthStateProvider
 builder.Services.AddScoped<CustomAuthStateProvider>();

@@ -8,6 +8,7 @@ public interface IS3Service
 {
     Task EnsureBucketExistsAsync();
     Task<string> UploadAsync(string key, Stream content, string contentType);
+    Task<Stream> DownloadAsync(string key);
     Task DeleteAsync(string key);
 }
 
@@ -48,6 +49,15 @@ public class S3Service : IS3Service
             ContentType = contentType,
         });
         return key;
+    }
+
+    public async Task<Stream> DownloadAsync(string key)
+    {
+        using var response = await _s3.GetObjectAsync(_bucketName, key);
+        var ms = new MemoryStream();
+        await response.ResponseStream.CopyToAsync(ms);
+        ms.Position = 0;
+        return ms;
     }
 
     public async Task DeleteAsync(string key)

@@ -37,5 +37,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
             .WithMany(p => p.Attachments)
             .HasForeignKey(a => a.ProblemId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Attachment>()
+            .HasOne(a => a.Event)
+            .WithMany(e => e.Attachments)
+            .HasForeignKey(a => a.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

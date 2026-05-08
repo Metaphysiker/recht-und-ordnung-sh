@@ -26,6 +26,9 @@ services:
       - SMTP__Port=${SMTP_PORT}
       - SMTP__FromEmail=${SMTP_FROM_EMAIL}
       - SMTP__FromName=${SMTP_FROM_NAME}
+      - SMTP__Username=${SMTP_USERNAME}
+      - SMTP__Password=${SMTP_PASSWORD}
+      - SMTP__EnableSsl=${SMTP_ENABLE_SSL:-true}
       - FrontendUrl=${FRONTEND_URL}
     depends_on:
       - postgres

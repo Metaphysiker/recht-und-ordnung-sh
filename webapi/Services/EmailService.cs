@@ -23,10 +23,17 @@ public class EmailService : IEmailService
         var fromEmail = _configuration["SMTP:FromEmail"] ?? "noreply@localhost";
         var fromName = _configuration["SMTP:FromName"] ?? "Application";
 
+        var smtpUsername = _configuration["SMTP:Username"];
+        var smtpPassword = _configuration["SMTP:Password"];
+        var enableSsl = bool.Parse(_configuration["SMTP:EnableSsl"] ?? "false");
+
         try
         {
             using var client = new System.Net.Mail.SmtpClient(smtpHost, smtpPort);
-            client.EnableSsl = false; // MailHog doesn't use SSL
+            client.EnableSsl = enableSsl;
+
+            if (!string.IsNullOrWhiteSpace(smtpUsername))
+                client.Credentials = new System.Net.NetworkCredential(smtpUsername, smtpPassword);
 
             var message = new System.Net.Mail.MailMessage
             {

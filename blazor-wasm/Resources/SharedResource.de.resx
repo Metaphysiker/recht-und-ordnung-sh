@@ -315,6 +315,33 @@
   </data>
 
   <!-- Authentication -->
+  <data name="Auth.MagicLinkTitle" xml:space="preserve">
+    <value>Magic-Link-Anmeldung</value>
+  </data>
+  <data name="Auth.MagicLinkHint" xml:space="preserve">
+    <value>Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Anmeldelink.</value>
+  </data>
+  <data name="Auth.MagicLinkSend" xml:space="preserve">
+    <value>Link senden</value>
+  </data>
+  <data name="Auth.MagicLinkSent" xml:space="preserve">
+    <value>Link gesendet! Bitte prüfen Sie Ihr Postfach.</value>
+  </data>
+  <data name="Auth.MagicLinkFailed" xml:space="preserve">
+    <value>Der Link konnte nicht gesendet werden. Bitte versuchen Sie es erneut.</value>
+  </data>
+  <data name="Auth.MagicLinkVerifying" xml:space="preserve">
+    <value>Anmeldung wird überprüft…</value>
+  </data>
+  <data name="Auth.MagicLinkSuccess" xml:space="preserve">
+    <value>Erfolgreich angemeldet!</value>
+  </data>
+  <data name="Auth.MagicLinkInvalid" xml:space="preserve">
+    <value>Der Link ist ungültig oder abgelaufen.</value>
+  </data>
+  <data name="Auth.BackToLogin" xml:space="preserve">
+    <value>Zurück zur Anmeldung</value>
+  </data>
   <data name="Auth.LoginTitle" xml:space="preserve">
     <value>Anmelden</value>
   </data>

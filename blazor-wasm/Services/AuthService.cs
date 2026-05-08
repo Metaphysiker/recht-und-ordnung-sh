@@ -50,6 +50,11 @@ public class AuthService
         return null;
     }
 
+    public async Task StoreTokenAsync(string token)
+    {
+        await SetTokenAsync(token);
+    }
+
     public async Task LogoutAsync()
     {
         await RemoveTokenAsync();

@@ -1,0 +1,82 @@
+@page "/auth/verify-magic-link"
+@using blazor_wasm.Models
+@using blazor_wasm.Services
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject AuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mt-16">
+    <MudPaper Class="pa-6" Elevation="3">
+        <MudStack AlignItems="AlignItems.Center" Spacing="3">
+            @if (_state == State.Verifying)
+            {
+                <MudProgressCircular Indeterminate="true" />
+                <MudText Typo="Typo.body1">@L["Auth.MagicLinkVerifying"]</MudText>
+            }
+            else if (_state == State.Success)
+            {
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Style="font-size:48px" />
+                <MudText Typo="Typo.h6">@L["Auth.MagicLinkSuccess"]</MudText>
+            }
+            else
+            {
+                <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error" Style="font-size:48px" />
+                <MudText Typo="Typo.h6">@L["Auth.MagicLinkInvalid"]</MudText>
+                <MudButton Variant="Variant.Outlined" Href="/login2">@L["Auth.MagicLinkTitle"]</MudButton>
+            }
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private enum State { Verifying, Success, Failed }
+    private State _state = State.Verifying;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var token = uri.Query.TrimStart('?')
+            .Split('&')
+            .Select(p => p.Split('=', 2))
+            .Where(p => p.Length == 2 && p[0].Equals("token", StringComparison.OrdinalIgnoreCase))
+            .Select(p => Uri.UnescapeDataString(p[1]))
+            .FirstOrDefault();
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            _state = State.Failed;
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/auth/magic-link/verify",
+                new MagicLinkVerifyDto { Token = token });
+
+            if (response.IsSuccessStatusCode)
+            {
+                var auth = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                if (auth != null)
+                {
+                    await AuthService.StoreTokenAsync(auth.Token);
+                    ((CustomAuthStateProvider)AuthStateProvider).NotifyAuthenticationStateChanged();
+                }
+
+                _state = State.Success;
+                await Task.Delay(1200);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                _state = State.Failed;
+            }
+        }
+        catch
+        {
+            _state = State.Failed;
+        }
+    }
+}

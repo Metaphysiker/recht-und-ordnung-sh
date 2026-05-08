@@ -1,0 +1,89 @@
+@page "/login2"
+@using blazor_wasm.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject IStringLocalizer<SharedResource> L
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Elevation="3" Class="pa-6">
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-2">@L["Auth.MagicLinkTitle"]</MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center" Class="mb-6">@L["Auth.MagicLinkHint"]</MudText>
+
+        @if (_sent)
+        {
+            <MudAlert Severity="Severity.Success" Icon="@Icons.Material.Filled.Email">
+                @L["Auth.MagicLinkSent"]
+            </MudAlert>
+        }
+        else
+        {
+            @if (_error != null)
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-4">@_error</MudAlert>
+            }
+
+            <MudTextField @bind-Value="_email"
+                          Label="@L["Common.Email"]"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Email"
+                          Required="true"
+                          Class="mb-4"
+                          OnKeyDown="OnKeyDown" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Disabled="_sending || string.IsNullOrWhiteSpace(_email)"
+                       OnClick="RequestAsync">
+                @if (_sending)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @L["Auth.MagicLinkSend"]
+            </MudButton>
+
+            <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+                <MudLink Href="/login">@L["Auth.BackToLogin"]</MudLink>
+            </MudText>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private string _email = string.Empty;
+    private bool _sending;
+    private bool _sent;
+    private string? _error;
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await RequestAsync();
+    }
+
+    private async Task RequestAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_email)) return;
+
+        _sending = true;
+        _error = null;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/auth/magic-link/request",
+                new MagicLinkRequestDto { Email = _email });
+
+            if (response.IsSuccessStatusCode)
+                _sent = true;
+            else
+                _error = L["Auth.MagicLinkFailed"];
+        }
+        catch
+        {
+            _error = L["Auth.MagicLinkFailed"];
+        }
+        finally
+        {
+            _sending = false;
+        }
+    }
+}

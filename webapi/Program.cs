@@ -20,12 +20,20 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 
-// Add AWS S3
-var awsRegion = builder.Configuration["AWS_REGION"] ?? builder.Configuration["AWS_DEFAULT_REGION"] ?? "eu-central-1";
-builder.Services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(
-    new AmazonS3Config { RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(awsRegion) }
-));
-builder.Services.AddSingleton<IS3Service, S3Service>();
+// Add file storage — use S3 if configured, otherwise local filesystem
+var awsBucketName = builder.Configuration["AWS_BUCKET_NAME"];
+if (!string.IsNullOrWhiteSpace(awsBucketName))
+{
+    var awsRegion = builder.Configuration["AWS_REGION"] ?? builder.Configuration["AWS_DEFAULT_REGION"] ?? "eu-central-1";
+    builder.Services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(
+        new AmazonS3Config { RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(awsRegion) }
+    ));
+    builder.Services.AddSingleton<IS3Service, S3Service>();
+}
+else
+{
+    builder.Services.AddSingleton<IS3Service, LocalFileService>();
+}
 builder.Services.AddScoped<webapi.Pdf.ProblemPdfGenerator>();
 
 // Add PostgreSQL DbContext
@@ -124,7 +132,7 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
     await DatabaseSeeder.SeedAdminUserAsync(userManager, roleManager, logger, app.Configuration);
 
-    // Ensure S3 bucket exists
+    // Ensure storage is initialized
     var s3 = app.Services.GetRequiredService<IS3Service>();
     await s3.EnsureBucketExistsAsync();
 }

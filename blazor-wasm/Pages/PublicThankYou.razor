@@ -1,0 +1,27 @@
+@page "/public/thank-you"
+@layout PublicLayout
+@using blazor_wasm.Layout
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["Public.ThankYouTitle"]</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-12">
+    <MudPaper Class="pa-8" Elevation="2" Style="border-radius: 16px; text-align: center;">
+        <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
+                 Color="Color.Success"
+                 Style="font-size: 72px;" />
+        <MudText Typo="Typo.h5" Class="mt-4 mb-2">@L["Public.ThankYouTitle"]</MudText>
+        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-6">
+            @L["Public.ThankYouText"]
+        </MudText>
+        <MudAlert Severity="Severity.Info" Class="mb-6" Elevation="0">
+            @L["Home.Confidential"]
+        </MudAlert>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.AddAlert"
+                   Href="/public/problems/new">
+            @L["Public.SubmitNewProblem"]
+        </MudButton>
+    </MudPaper>
+</MudContainer>

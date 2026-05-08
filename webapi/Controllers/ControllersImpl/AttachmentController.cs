@@ -59,6 +59,7 @@ public class AttachmentController : ModelDtoControllerBase<Attachment, Attachmen
     public override Task<ActionResult<AttachmentDto>> Create([FromBody] AttachmentDto dto)
         => Task.FromResult<ActionResult<AttachmentDto>>(StatusCode(405));
 
+    [AllowAnonymous]
     [HttpPost("upload")]
     public async Task<ActionResult<AttachmentDto>> Upload(
         [FromForm] IFormFile file,

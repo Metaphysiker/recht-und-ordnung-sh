@@ -5,10 +5,11 @@
 @inject AuthService AuthService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
     <MudPaper Elevation="3" Class="pa-6">
-        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">Register</MudText>
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">@L["Auth.RegisterTitle"]</MudText>
 
         @if (!string.IsNullOrEmpty(_errorMessage))
         {
@@ -22,40 +23,40 @@
 
         <MudForm @ref="_form">
             <MudTextField @bind-Value="_model.Email"
-                          Label="Email"
+                          Label="@L["Common.Email"]"
                           Variant="Variant.Outlined"
                           Required="true"
-                          RequiredError="Email is required"
+                          RequiredError="@L["Auth.EmailRequired"]"
                           InputType="InputType.Email"
                           Class="mb-4" />
 
             <MudTextField @bind-Value="_model.FirstName"
-                          Label="First Name"
+                          Label="@L["Auth.FirstName"]"
                           Variant="Variant.Outlined"
                           Required="true"
-                          RequiredError="First name is required"
+                          RequiredError="@L["Auth.FirstNameRequired"]"
                           Class="mb-4" />
 
             <MudTextField @bind-Value="_model.LastName"
-                          Label="Last Name"
+                          Label="@L["Auth.LastName"]"
                           Variant="Variant.Outlined"
                           Required="true"
-                          RequiredError="Last name is required"
+                          RequiredError="@L["Auth.LastNameRequired"]"
                           Class="mb-4" />
 
             <MudTextField @bind-Value="_model.PhoneNumber"
-                          Label="Phone Number (Optional)"
+                          Label="@L["Auth.PhoneNumber"]"
                           Variant="Variant.Outlined"
                           InputType="InputType.Telephone"
                           Class="mb-4" />
 
             <MudTextField @bind-Value="_model.Password"
-                          Label="Password"
+                          Label="@L["Common.Password"]"
                           Variant="Variant.Outlined"
                           Required="true"
-                          RequiredError="Password is required"
+                          RequiredError="@L["Auth.PasswordRequired"]"
                           InputType="InputType.Password"
-                          HelperText="Minimum 8 characters, at least one uppercase, one lowercase, and one digit"
+                          HelperText="@L["Auth.PasswordHelp"]"
                           Class="mb-4" />
 
             <MudButton Variant="Variant.Filled"
@@ -70,13 +71,13 @@
                 }
                 else
                 {
-                    <span>Register</span>
+                    <span>@L["Auth.RegisterTitle"]</span>
                 }
             </MudButton>
 
             <MudText Align="Align.Center">
-                Already have an account?
-                <MudLink Href="/login" Color="Color.Primary">Login</MudLink>
+                @L["Auth.HasAccount"]
+                <MudLink Href="/login" Color="Color.Primary">@L["Nav.Login"]</MudLink>
             </MudText>
         </MudForm>
     </MudPaper>
@@ -101,7 +102,7 @@
 
             if (result != null)
             {
-                _successMessage = "Registration successful! Redirecting...";
+                _successMessage = L["Auth.RegistrationSuccess"];
                 ((CustomAuthStateProvider)AuthStateProvider).NotifyAuthenticationStateChanged();
 
                 await Task.Delay(1500);
@@ -109,12 +110,12 @@
             }
             else
             {
-                _errorMessage = "Registration failed. Please check your information.";
+                _errorMessage = L["Auth.RegistrationFailed"];
             }
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Registration failed: {ex.Message}";
+            _errorMessage = L["Auth.RegistrationFailedError", ex.Message];
         }
         finally
         {

@@ -1,5 +1,10 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+.mud-main-content {
+    background-color: #f5f5f5;
 }
 
 h1:focus {

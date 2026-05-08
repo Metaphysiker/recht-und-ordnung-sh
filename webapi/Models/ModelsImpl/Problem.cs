@@ -16,4 +16,5 @@ public class Problem : IModel, IEntityWithUser
     public ApplicationUser? User { get; set;}
     public Guid? UserId { get; set; }
     public string? PublicPassword { get; set; }
+    public string? Email { get; set; }
 }

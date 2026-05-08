@@ -3,14 +3,15 @@
 @using blazor_wasm.Services
 @using blazor_wasm.Components
 @inject EventService EventService
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Events</PageTitle>
+<PageTitle>@L["Event.PageTitle"]</PageTitle>
 
 <CrudPage TDto="EventDto"
           TSearchDto="EventSearchDto"
-          Title="Events"
-          DialogTitle="Event"
+          Title="@L["Event.PageTitle"]"
+          DialogTitle="@L["Event.DialogTitle"]"
           Service="@EventService"
           CreateNewInstance="@(() => new EventDto())"
           GetId="@(item => item.Id)"
@@ -22,35 +23,35 @@
 @code {
     private static string StripHtml(string html) =>
         string.IsNullOrEmpty(html) ? "" : System.Text.RegularExpressions.Regex.Replace(html, "<[^>]*>", "");
+
     private RenderFragment EventTableHeaders =>
         @<text>
-            <MudTh>Title</MudTh>
-            <MudTh>Event Date</MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh Style="text-align: right;">Actions</MudTh>
+            <MudTh>@L["Event.ColTitle"]</MudTh>
+            <MudTh>@L["Event.ColDate"]</MudTh>
+            <MudTh>@L["Event.ColDescription"]</MudTh>
+            <MudTh Style="text-align: right;">@L["Common.Actions"]</MudTh>
         </text>;
 
     private RenderFragment<EventDto> EventRow => (item) =>
         @<text>
-            <MudTd DataLabel="Title">@item.Title</MudTd>
-            <MudTd DataLabel="Event Date">@item.EventDate.ToString("g")</MudTd>
-            <MudTd DataLabel="Description">
+            <MudTd DataLabel="@L["Event.ColTitle"]">@item.Title</MudTd>
+            <MudTd DataLabel="@L["Event.ColDate"]">@item.EventDate.ToString("g")</MudTd>
+            <MudTd DataLabel="@L["Event.ColDescription"]">
                 @(StripHtml(item.Description) is { } plain && plain.Length > 80 ? plain[..80] + "…" : StripHtml(item.Description))
             </MudTd>
         </text>;
 
     private RenderFragment<EventDto> EventFormContent => (model) =>
-            @<EventForm Model="model" />;
+        @<EventForm Model="model" />;
 
     private RenderFragment<EventSearchDto> EventSearchFilters => (search) =>
         @<MudStack Row="true" Spacing="2">
             <MudDatePicker @bind-Date="@search.FromDate"
-                           Label="From Date"
+                           Label="@L["Event.FromDate"]"
                            Variant="Variant.Outlined"
                            Clearable="true" />
-
             <MudDatePicker @bind-Date="@search.ToDate"
-                           Label="To Date"
+                           Label="@L["Event.ToDate"]"
                            Variant="Variant.Outlined"
                            Clearable="true" />
         </MudStack>;

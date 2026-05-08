@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Controllers;
 using webapi.Data;
+using webapi.Models.DTOs;
 using webapi.Models.DTOs.DTOsImpl;
 using webapi.Models.ModelsImpl;
 using webapi.Pdf;
@@ -31,6 +32,7 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
         entity.Title = dto.Title;
         entity.Description = dto.Description;
         entity.UserId = dto.UserId;
+        entity.Email = dto.Email;
         entity.Coordinates = dto.Coordinates
             .Select(c => new Coordinate { Latitude = c.Latitude, Longitude = c.Longitude })
             .ToList();
@@ -55,7 +57,8 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
                 .Select(c => new CoordinateDto { Latitude = c.Latitude, Longitude = c.Longitude })
                 .ToList(),
             UserId = entity.UserId,
-            HasPublicPassword = entity.PublicPassword != null
+            HasPublicPassword = entity.PublicPassword != null,
+            Email = entity.Email
         };
     }
 
@@ -83,6 +86,32 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
             return NotFound(new { message = $"Entity with ID {id} not found" });
 
         return Ok(MapToDto(entity));
+    }
+
+    [AllowAnonymous]
+    [HttpPost("public")]
+    public async Task<ActionResult<ProblemDto>> CreatePublic([FromBody] PublicProblemRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title))
+            return BadRequest(new { message = "Title is required" });
+
+        var entity = new Problem
+        {
+            Id = Guid.NewGuid(),
+            Title = request.Title,
+            Description = request.Description ?? string.Empty,
+            Email = request.Email,
+            Coordinates = (request.Coordinates ?? [])
+                .Select(c => new Coordinate { Latitude = c.Latitude, Longitude = c.Longitude })
+                .ToList(),
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow,
+        };
+
+        _dbSet.Add(entity);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetById), new { id = entity.Id }, MapToDto(entity));
     }
 
     [AllowAnonymous]
@@ -159,3 +188,9 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
 }
 
 public record UnlockRequest(string Password);
+
+public record PublicProblemRequest(
+    string Title,
+    string? Description,
+    string? Email,
+    List<CoordinateDto>? Coordinates);

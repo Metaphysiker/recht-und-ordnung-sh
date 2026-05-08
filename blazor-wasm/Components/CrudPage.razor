@@ -4,6 +4,7 @@
 @using blazor_wasm.Services
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <CrudSearchList TDto="TDto"
                 TSearchDto="TSearchDto"
@@ -58,7 +59,7 @@
         };
 
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        dialog = await DialogService.ShowAsync<CrudDialog<TDto>>($"Create {DialogTitle}", parameters, options);
+        dialog = await DialogService.ShowAsync<CrudDialog<TDto>>($"{L["Common.Create"]}: {DialogTitle}", parameters, options);
     }
 
     private async Task OpenEditDialog(TDto item)
@@ -80,20 +81,20 @@
         };
 
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        dialog = await DialogService.ShowAsync<CrudDialog<TDto>>($"Edit {DialogTitle}", parameters, options);
+        dialog = await DialogService.ShowAsync<CrudDialog<TDto>>($"{L["Common.Edit"]}: {DialogTitle}", parameters, options);
     }
 
     private async Task ConfirmDelete(TDto item)
     {
         var parameters = new DialogParameters
         {
-            { "ContentText", $"Are you sure you want to delete this {DialogTitle.ToLower()}?" },
-            { "ButtonText", "Delete" },
+            { "ContentText", L["Crud.ConfirmDeleteText"].ToString() },
+            { "ButtonText", L["Common.Delete"].ToString() },
             { "Color", Color.Error }
         };
 
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
-        var dialog = await DialogService.ShowAsync<MudMessageBox>("Confirm Delete", parameters, options);
+        var dialog = await DialogService.ShowAsync<MudMessageBox>(L["Crud.ConfirmDeleteTitle"], parameters, options);
         var result = await dialog.Result;
 
         if (result != null && !result.Canceled)
@@ -107,10 +108,10 @@
         var result = await Service.CreateAsync(item);
         if (result != null)
         {
-            Snackbar.Add($"{DialogTitle} created successfully", Severity.Success);
+            Snackbar.Add(L["Crud.CreatedSuccess"], Severity.Success);
             return true;
         }
-        Snackbar.Add($"Failed to create {DialogTitle.ToLower()}", Severity.Error);
+        Snackbar.Add(L["Crud.CreateFailed"], Severity.Error);
         return false;
     }
 
@@ -122,10 +123,10 @@
             var result = await Service.UpdateAsync(id.Value, item);
             if (result != null)
             {
-                Snackbar.Add($"{DialogTitle} updated successfully", Severity.Success);
+                Snackbar.Add(L["Crud.UpdatedSuccess"], Severity.Success);
                 return true;
             }
-            Snackbar.Add($"Failed to update {DialogTitle.ToLower()}", Severity.Error);
+            Snackbar.Add(L["Crud.UpdateFailed"], Severity.Error);
         }
         return false;
     }
@@ -138,12 +139,12 @@
             var success = await Service.DeleteAsync(id.Value);
             if (success)
             {
-                Snackbar.Add($"{DialogTitle} deleted successfully", Severity.Success);
+                Snackbar.Add(L["Crud.DeletedSuccess"], Severity.Success);
                 await RefreshList();
             }
             else
             {
-                Snackbar.Add($"Failed to delete {DialogTitle.ToLower()}", Severity.Error);
+                Snackbar.Add(L["Crud.DeleteFailed"], Severity.Error);
             }
         }
     }

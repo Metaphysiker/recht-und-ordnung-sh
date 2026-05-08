@@ -2,6 +2,7 @@
 @typeparam TSearchDto where TSearchDto : SearchDto, new()
 @using blazor_wasm.Models
 @using blazor_wasm.Services
+@inject IStringLocalizer<SharedResource> L
 
 <MudPaper Class="pa-4">
     <MudStack Spacing="3">
@@ -14,14 +15,14 @@
                            Color="Color.Primary"
                            StartIcon="@Icons.Material.Filled.Add"
                            OnClick="@(() => OnCreateClicked.InvokeAsync())">
-                    Create New
+                    @L["Common.CreateNew"]
                 </MudButton>
             }
         </MudStack>
 
         <!-- Search Bar -->
         <MudTextField @bind-Value="_searchTerm"
-                      Label="Search"
+                      Label="@L["Common.Search"]"
                       Variant="Variant.Outlined"
                       Adornment="Adornment.End"
                       AdornmentIcon="@Icons.Material.Filled.Search"
@@ -71,7 +72,7 @@
                                                Color="Color.Primary"
                                                Size="Size.Small"
                                                OnClick="@(() => OnSelectClicked.InvokeAsync(new HashSet<TDto> { context }))">
-                                        Select
+                                        @L["Common.Select"]
                                     </MudButton>
                                 }
                             }
@@ -103,13 +104,13 @@
                            Class="mt-4" />
 
             <MudText Typo="Typo.caption" Class="mt-2">
-                Showing @(_paginationResult.Items.Count()) of @_paginationResult.Total items
+                @L["Common.ShowingXofY", _paginationResult.Items.Count(), _paginationResult.Total]
             </MudText>
         }
         else if (!_isLoading)
         {
             <MudText Typo="Typo.body1" Align="Align.Center" Class="my-4">
-                No records found
+                @L["Common.NoRecordsFound"]
             </MudText>
         }
     </MudStack>

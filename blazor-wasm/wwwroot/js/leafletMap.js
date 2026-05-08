@@ -66,7 +66,7 @@ window.LeafletMap = {
             }
 
             if (editable) {
-                marker.bindTooltip('Click to remove', { direction: 'top' });
+                marker.bindTooltip('Klicken zum Entfernen', { direction: 'top' });
                 marker.on('click', (e) => {
                     L.DomEvent.stopPropagation(e); // prevent also firing map click
                     dotNetRef.invokeMethodAsync('HandleMarkerClick', index);

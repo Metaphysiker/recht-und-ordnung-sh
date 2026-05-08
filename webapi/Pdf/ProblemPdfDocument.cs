@@ -49,7 +49,7 @@ public class ProblemPdfDocument : IDocument
             .Row(row =>
             {
                 row.RelativeItem()
-                    .Text("Recht und Ordnung SH")
+                    .Text("Recht und Ordnung - Schaffhausen")
                     .FontSize(10)
                     .FontColor(TextSecondary);
 

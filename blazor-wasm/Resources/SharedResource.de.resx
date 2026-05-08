@@ -63,12 +63,6 @@
   <data name="Nav.Home" xml:space="preserve">
     <value>Startseite</value>
   </data>
-  <data name="Nav.Counter" xml:space="preserve">
-    <value>Zähler</value>
-  </data>
-  <data name="Nav.Weather" xml:space="preserve">
-    <value>Wetter</value>
-  </data>
   <data name="Nav.ImageCleaner" xml:space="preserve">
     <value>Bild-Metadaten-Reiniger</value>
   </data>
@@ -88,97 +82,432 @@
     <value>Abmelden</value>
   </data>
   <data name="Nav.MagicLinkLogin" xml:space="preserve">
-    <value>Magic Link Anmeldung</value>
+    <value>Magic-Link-Anmeldung</value>
+  </data>
+  <data name="Nav.SubmitProblem" xml:space="preserve">
+    <value>Problem melden</value>
   </data>
 
-  <!-- Image Cleaner Page -->
-  <data name="ImageCleaner.Title" xml:space="preserve">
-    <value>Bild-Metadaten-Reiniger</value>
-  </data>
-  <data name="ImageCleaner.Description" xml:space="preserve">
-    <value>Entfernen Sie EXIF und andere Metadaten von Ihren Bildern. Die gesamte Verarbeitung erfolgt in Ihrem Browser - keine Daten werden auf einen Server hochgeladen.</value>
-  </data>
-  <data name="ImageCleaner.SelectImages" xml:space="preserve">
-    <value>Bilder auswählen</value>
-  </data>
-  <data name="ImageCleaner.Processed" xml:space="preserve">
-    <value>✓ Verarbeitet</value>
-  </data>
-  <data name="ImageCleaner.Processing" xml:space="preserve">
-    <value>Verarbeitung...</value>
-  </data>
-  <data name="ImageCleaner.CleanMetadata" xml:space="preserve">
-    <value>Metadaten bereinigen</value>
-  </data>
-  <data name="ImageCleaner.DownloadAll" xml:space="preserve">
-    <value>Alle herunterladen</value>
-  </data>
-  <data name="ImageCleaner.Clear" xml:space="preserve">
-    <value>Löschen</value>
-  </data>
-  <data name="ImageCleaner.BeforeAfterComparison" xml:space="preserve">
-    <value>Vorher &amp; Nachher Vergleich</value>
-  </data>
-  <data name="ImageCleaner.OriginalWithMetadata" xml:space="preserve">
-    <value>Original (mit Metadaten)</value>
-  </data>
-  <data name="ImageCleaner.CleanedNoMetadata" xml:space="preserve">
-    <value>Bereinigt (Metadaten entfernt)</value>
-  </data>
-  <data name="ImageCleaner.DownloadCleanedImage" xml:space="preserve">
-    <value>Bereinigtes Bild herunterladen</value>
-  </data>
-  <data name="ImageCleaner.Loading" xml:space="preserve">
-    <value>Wird geladen...</value>
-  </data>
-  <data name="ImageCleaner.Original" xml:space="preserve">
-    <value>Original:</value>
-  </data>
-  <data name="ImageCleaner.Cleaned" xml:space="preserve">
-    <value>Bereinigt:</value>
-  </data>
-  <data name="ImageCleaner.Size" xml:space="preserve">
-    <value>Größe</value>
-  </data>
-  <data name="ImageCleaner.Dimensions" xml:space="preserve">
-    <value>Abmessungen</value>
-  </data>
-  <data name="ImageCleaner.FoundXExifFields" xml:space="preserve">
-    <value>Gefunden {0} EXIF-Felder:</value>
-  </data>
-  <data name="ImageCleaner.NoExifDataFound" xml:space="preserve">
-    <value>Keine EXIF-Daten gefunden</value>
-  </data>
-  <data name="ImageCleaner.AllMetadataRemoved" xml:space="preserve">
-    <value>✓ Alle Metadaten entfernt</value>
-  </data>
-  <data name="ImageCleaner.SizeReducedByX" xml:space="preserve">
-    <value>Größe um {0}% reduziert</value>
+  <!-- Layout -->
+  <data name="Layout.Welcome" xml:space="preserve">
+    <value>Willkommen, {0}!</value>
   </data>
 
-  <!-- Common -->
-  <data name="Common.Download" xml:space="preserve">
-    <value>Herunterladen</value>
+  <!-- Common actions -->
+  <data name="Common.Create" xml:space="preserve">
+    <value>Erstellen</value>
   </data>
-  <data name="Common.Cancel" xml:space="preserve">
-    <value>Abbrechen</value>
+  <data name="Common.CreateNew" xml:space="preserve">
+    <value>Neu erstellen</value>
   </data>
-  <data name="Common.Save" xml:space="preserve">
-    <value>Speichern</value>
-  </data>
-  <data name="Common.Delete" xml:space="preserve">
-    <value>Löschen</value>
+  <data name="Common.Update" xml:space="preserve">
+    <value>Aktualisieren</value>
   </data>
   <data name="Common.Edit" xml:space="preserve">
     <value>Bearbeiten</value>
   </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
   <data name="Common.Close" xml:space="preserve">
     <value>Schließen</value>
+  </data>
+  <data name="Common.Download" xml:space="preserve">
+    <value>Herunterladen</value>
+  </data>
+  <data name="Common.Back" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="Common.Select" xml:space="preserve">
+    <value>Auswählen</value>
+  </data>
+  <data name="Common.Search" xml:space="preserve">
+    <value>Suchen</value>
   </data>
   <data name="Common.Yes" xml:space="preserve">
     <value>Ja</value>
   </data>
   <data name="Common.No" xml:space="preserve">
     <value>Nein</value>
+  </data>
+  <data name="Common.Actions" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
+  <data name="Common.SaveAsPdf" xml:space="preserve">
+    <value>Als PDF speichern</value>
+  </data>
+  <data name="Common.Generating" xml:space="preserve">
+    <value>Wird erstellt...</value>
+  </data>
+  <data name="Common.ClearAll" xml:space="preserve">
+    <value>Alle löschen</value>
+  </data>
+
+  <!-- Common field labels -->
+  <data name="Common.Title" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="Common.Description" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Common.Email" xml:space="preserve">
+    <value>E-Mail-Adresse</value>
+  </data>
+
+  <!-- List / table -->
+  <data name="Common.NoRecordsFound" xml:space="preserve">
+    <value>Keine Einträge gefunden</value>
+  </data>
+  <data name="Common.ShowingXofY" xml:space="preserve">
+    <value>Zeige {0} von {1} Einträgen</value>
+  </data>
+
+  <!-- CRUD dialogs & feedback -->
+  <data name="Crud.ConfirmDeleteTitle" xml:space="preserve">
+    <value>Löschen bestätigen</value>
+  </data>
+  <data name="Crud.ConfirmDeleteText" xml:space="preserve">
+    <value>Möchten Sie diesen Eintrag wirklich löschen?</value>
+  </data>
+  <data name="Crud.CreatedSuccess" xml:space="preserve">
+    <value>Erfolgreich erstellt</value>
+  </data>
+  <data name="Crud.CreateFailed" xml:space="preserve">
+    <value>Fehler beim Erstellen</value>
+  </data>
+  <data name="Crud.UpdatedSuccess" xml:space="preserve">
+    <value>Erfolgreich aktualisiert</value>
+  </data>
+  <data name="Crud.UpdateFailed" xml:space="preserve">
+    <value>Fehler beim Aktualisieren</value>
+  </data>
+  <data name="Crud.DeletedSuccess" xml:space="preserve">
+    <value>Erfolgreich gelöscht</value>
+  </data>
+  <data name="Crud.DeleteFailed" xml:space="preserve">
+    <value>Fehler beim Löschen</value>
+  </data>
+
+  <!-- Problems -->
+  <data name="Problem.PageTitle" xml:space="preserve">
+    <value>Probleme</value>
+  </data>
+  <data name="Problem.DialogTitle" xml:space="preserve">
+    <value>Problem</value>
+  </data>
+  <data name="Problem.ColTitle" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="Problem.ColDescription" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Problem.ColEventCount" xml:space="preserve">
+    <value>Anzahl Ereignisse</value>
+  </data>
+  <data name="Problem.NotFound" xml:space="preserve">
+    <value>Problem nicht gefunden.</value>
+  </data>
+  <data name="Problem.Events" xml:space="preserve">
+    <value>Ereignisse</value>
+  </data>
+  <data name="Problem.AddEvent" xml:space="preserve">
+    <value>Ereignis hinzufügen</value>
+  </data>
+  <data name="Problem.NoEvents" xml:space="preserve">
+    <value>Keine Ereignisse für dieses Problem erfasst.</value>
+  </data>
+  <data name="Problem.Location" xml:space="preserve">
+    <value>Standort</value>
+  </data>
+  <data name="Problem.ClickMapHint" xml:space="preserve">
+    <value>Karte anklicken, um Punkte hinzuzufügen</value>
+  </data>
+  <data name="Problem.CoordIndex" xml:space="preserve">
+    <value>#</value>
+  </data>
+  <data name="Problem.CoordLat" xml:space="preserve">
+    <value>Breitengrad</value>
+  </data>
+  <data name="Problem.CoordLng" xml:space="preserve">
+    <value>Längengrad</value>
+  </data>
+  <data name="Problem.CoordHintPin" xml:space="preserve">
+    <value>1 Punkt — Stecknadel</value>
+  </data>
+  <data name="Problem.CoordHintLine" xml:space="preserve">
+    <value>2 Punkte — Linie</value>
+  </data>
+  <data name="Problem.CoordHintArea" xml:space="preserve">
+    <value>{0} Punkte — Fläche</value>
+  </data>
+  <data name="Problem.EmailHint" xml:space="preserve">
+    <value>Damit wir Sie bei Rückfragen kontaktieren können.</value>
+  </data>
+  <data name="Problem.PublicPassword" xml:space="preserve">
+    <value>Öffentliches Zugangspasswort</value>
+  </data>
+  <data name="Problem.PublicPasswordHintSet" xml:space="preserve">
+    <value>Passwort ist gesetzt — leer lassen, um es beizubehalten, oder ein neues eingeben, um es zu ändern.</value>
+  </data>
+  <data name="Problem.PublicPasswordHintEmpty" xml:space="preserve">
+    <value>Passwort festlegen, um öffentlichen Zugang zu ermöglichen. Leer lassen für keinen öffentlichen Zugang.</value>
+  </data>
+
+  <!-- Events -->
+  <data name="Event.PageTitle" xml:space="preserve">
+    <value>Ereignisse</value>
+  </data>
+  <data name="Event.DialogTitle" xml:space="preserve">
+    <value>Ereignis</value>
+  </data>
+  <data name="Event.ColTitle" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="Event.ColDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="Event.ColDescription" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Event.Date" xml:space="preserve">
+    <value>Datum (UTC)</value>
+  </data>
+  <data name="Event.Time" xml:space="preserve">
+    <value>Uhrzeit (UTC)</value>
+  </data>
+  <data name="Event.FromDate" xml:space="preserve">
+    <value>Von Datum</value>
+  </data>
+  <data name="Event.ToDate" xml:space="preserve">
+    <value>Bis Datum</value>
+  </data>
+
+  <!-- Attachments -->
+  <data name="Attachment.Title" xml:space="preserve">
+    <value>Anhänge</value>
+  </data>
+  <data name="Attachment.Upload" xml:space="preserve">
+    <value>Datei hochladen</value>
+  </data>
+  <data name="Attachment.Uploading" xml:space="preserve">
+    <value>Wird hochgeladen...</value>
+  </data>
+
+  <data name="Common.Password" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="Common.Loading" xml:space="preserve">
+    <value>Wird geladen...</value>
+  </data>
+
+  <!-- App / routing -->
+  <data name="App.NotFound" xml:space="preserve">
+    <value>Seite nicht gefunden</value>
+  </data>
+  <data name="App.NotFoundMessage" xml:space="preserve">
+    <value>Diese Seite existiert nicht.</value>
+  </data>
+
+  <!-- Authentication -->
+  <data name="Auth.LoginTitle" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="Auth.LoggingOut" xml:space="preserve">
+    <value>Abmeldung läuft...</value>
+  </data>
+  <data name="Auth.EmailRequired" xml:space="preserve">
+    <value>E-Mail ist erforderlich</value>
+  </data>
+  <data name="Auth.PasswordRequired" xml:space="preserve">
+    <value>Passwort ist erforderlich</value>
+  </data>
+  <data name="Auth.NoAccount" xml:space="preserve">
+    <value>Noch kein Konto?</value>
+  </data>
+  <data name="Auth.InvalidCredentials" xml:space="preserve">
+    <value>Ungültige E-Mail oder Passwort</value>
+  </data>
+  <data name="Auth.LoginFailed" xml:space="preserve">
+    <value>Anmeldung fehlgeschlagen: {0}</value>
+  </data>
+  <data name="Auth.RegisterTitle" xml:space="preserve">
+    <value>Registrieren</value>
+  </data>
+  <data name="Auth.FirstName" xml:space="preserve">
+    <value>Vorname</value>
+  </data>
+  <data name="Auth.FirstNameRequired" xml:space="preserve">
+    <value>Vorname ist erforderlich</value>
+  </data>
+  <data name="Auth.LastName" xml:space="preserve">
+    <value>Nachname</value>
+  </data>
+  <data name="Auth.LastNameRequired" xml:space="preserve">
+    <value>Nachname ist erforderlich</value>
+  </data>
+  <data name="Auth.PhoneNumber" xml:space="preserve">
+    <value>Telefonnummer (Optional)</value>
+  </data>
+  <data name="Auth.PasswordHelp" xml:space="preserve">
+    <value>Mindestens 8 Zeichen, mindestens ein Großbuchstabe, ein Kleinbuchstabe und eine Ziffer</value>
+  </data>
+  <data name="Auth.HasAccount" xml:space="preserve">
+    <value>Bereits ein Konto?</value>
+  </data>
+  <data name="Auth.RegistrationSuccess" xml:space="preserve">
+    <value>Registrierung erfolgreich! Weiterleitung...</value>
+  </data>
+  <data name="Auth.RegistrationFailed" xml:space="preserve">
+    <value>Registrierung fehlgeschlagen. Bitte überprüfen Sie Ihre Angaben.</value>
+  </data>
+  <data name="Auth.RegistrationFailedError" xml:space="preserve">
+    <value>Registrierung fehlgeschlagen: {0}</value>
+  </data>
+
+  <!-- Layout -->
+  <data name="Layout.Navigation" xml:space="preserve">
+    <value>Navigation</value>
+  </data>
+
+  <!-- Problem selector -->
+  <data name="Problem.SelectProblem" xml:space="preserve">
+    <value>Problem auswählen</value>
+  </data>
+
+  <!-- Home page -->
+  <data name="Home.Title" xml:space="preserve">
+    <value>Startseite</value>
+  </data>
+  <data name="Home.HeroTitle" xml:space="preserve">
+    <value>Rechtswidrige Bauten melden</value>
+  </data>
+  <data name="Home.HeroSubtitle" xml:space="preserve">
+    <value>Helfen Sie mit, illegale Bauvorhaben in Schaffhausen sichtbar zu machen.</value>
+  </data>
+  <data name="Home.HeroDescription" xml:space="preserve">
+    <value>Über dieses Formular können Sie Hinweise zu mutmasslich rechtswidrigen Bauten, unerlaubten Umbauten oder verdächtigen Bauarbeiten melden. Ihre Meldung unterstützt dabei, mögliche Verstösse gegen Bauvorschriften zu dokumentieren.</value>
+  </data>
+  <data name="Home.CtaButton" xml:space="preserve">
+    <value>Jetzt melden</value>
+  </data>
+  <data name="Home.HowItWorksTitle" xml:space="preserve">
+    <value>So funktioniert es: </value>
+  </data>
+  <data name="Home.Step1Title" xml:space="preserve">
+    <value>Problem beschreiben</value>
+  </data>
+  <data name="Home.Step1Text" xml:space="preserve">
+    <value>Geben Sie Titel und Beschreibung des mutmasslich rechtswidrigen Bauvorhabens an.</value>
+  </data>
+  <data name="Home.Step2Title" xml:space="preserve">
+    <value>Standort &amp; Fotos</value>
+  </data>
+  <data name="Home.Step2Text" xml:space="preserve">
+    <value>Markieren Sie den genauen Standort auf der Karte und fügen Sie Fotos als Belege hinzu.</value>
+  </data>
+  <data name="Home.Step3Title" xml:space="preserve">
+    <value>Meldung einreichen</value>
+  </data>
+  <data name="Home.Step3Text" xml:space="preserve">
+    <value>Ihre Meldung wird vertraulich bearbeitet.</value>
+  </data>
+  <data name="Home.Confidential" xml:space="preserve">
+    <value>Alle Hinweise werden vertraulich behandelt.</value>
+  </data>
+
+  <!-- Counter page -->
+  <data name="Counter.Title" xml:space="preserve">
+    <value>Zähler</value>
+  </data>
+  <data name="Counter.CurrentCount" xml:space="preserve">
+    <value>Aktueller Zähler: {0}</value>
+  </data>
+  <data name="Counter.ClickMe" xml:space="preserve">
+    <value>Klick mich</value>
+  </data>
+
+  <!-- Weather page -->
+  <data name="Weather.Title" xml:space="preserve">
+    <value>Wetter</value>
+  </data>
+  <data name="Weather.Description" xml:space="preserve">
+    <value>Diese Komponente demonstriert das Abrufen von Daten vom Server.</value>
+  </data>
+  <data name="Weather.ColDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="Weather.ColTempC" xml:space="preserve">
+    <value>Temperatur (°C)</value>
+  </data>
+  <data name="Weather.ColTempF" xml:space="preserve">
+    <value>Temperatur (°F)</value>
+  </data>
+  <data name="Weather.ColSummary" xml:space="preserve">
+    <value>Zusammenfassung</value>
+  </data>
+
+  <!-- Public view -->
+  <data name="Public.AccessRestricted" xml:space="preserve">
+    <value>Zugang gesperrt</value>
+  </data>
+  <data name="Public.EnterPasswordHint" xml:space="preserve">
+    <value>Geben Sie das Passwort ein, um dieses Problem anzusehen.</value>
+  </data>
+  <data name="Public.Password" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="Public.IncorrectPassword" xml:space="preserve">
+    <value>Falsches Passwort.</value>
+  </data>
+  <data name="Public.Unlock" xml:space="preserve">
+    <value>Entsperren</value>
+  </data>
+  <data name="Public.NotPublic" xml:space="preserve">
+    <value>Dieses Problem ist nicht öffentlich zugänglich.</value>
+  </data>
+  <data name="Public.SubmitProblem" xml:space="preserve">
+    <value>Problem einreichen</value>
+  </data>
+  <data name="Public.SubmitProblemHint" xml:space="preserve">
+    <value>Beschreiben Sie das Problem so genau wie möglich. Sie können optional einen Standort auf der Karte markieren.</value>
+  </data>
+  <data name="Public.Submit" xml:space="preserve">
+    <value>Einreichen</value>
+  </data>
+  <data name="Public.SubmitSuccess" xml:space="preserve">
+    <value>Problem erfolgreich eingereicht!</value>
+  </data>
+  <data name="Public.SubmitSuccessHint" xml:space="preserve">
+    <value>Ihr Problem wurde übermittelt und wird bearbeitet.</value>
+  </data>
+  <data name="Public.SubmitNewProblem" xml:space="preserve">
+    <value>Weiteres Problem einreichen</value>
+  </data>
+  <data name="Public.SubmitFailed" xml:space="preserve">
+    <value>Das Problem konnte nicht eingereicht werden. Bitte versuchen Sie es erneut.</value>
+  </data>
+  <data name="Public.Attachments" xml:space="preserve">
+    <value>Fotos &amp; Anhänge</value>
+  </data>
+  <data name="Public.AttachmentsHint" xml:space="preserve">
+    <value>Optional — Fotos werden vor dem Hochladen komprimiert.</value>
+  </data>
+  <data name="Public.UploadingFiles" xml:space="preserve">
+    <value>Dateien werden hochgeladen ({0}/{1})…</value>
+  </data>
+  <data name="Public.UploadFailed" xml:space="preserve">
+    <value>Einige Dateien konnten nicht hochgeladen werden.</value>
+  </data>
+  <data name="Public.ThankYouTitle" xml:space="preserve">
+    <value>Vielen Dank für Ihre Meldung!</value>
+  </data>
+  <data name="Public.ThankYouText" xml:space="preserve">
+    <value>Ihr Hinweis wurde erfolgreich übermittelt und wird von uns bearbeitet.</value>
   </data>
 </root>

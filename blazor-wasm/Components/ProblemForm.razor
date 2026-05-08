@@ -1,25 +1,33 @@
+@inject IStringLocalizer<SharedResource> L
+
 <MudTextField @bind-Value="Model.Title"
-              Label="Title"
+              Label="@L["Common.Title"]"
               Variant="Variant.Outlined"
               Required="true"
               Class="mb-4" />
 
-<MudTextField @bind-Value="Model.PublicPassword"
-              Label="Public access password"
+<MudTextField @bind-Value="Model.Email"
+              Label="@L["Common.Email"]"
               Variant="Variant.Outlined"
-              InputType="InputType.Password"
-              HelperText="@(Model.HasPublicPassword ? "Password is set — leave blank to keep it, or enter a new one to change it." : "Set a password to allow public access. Leave blank for no public access.")"
+              InputType="InputType.Email"
               Class="mb-4" />
 
-<MudText Typo="Typo.subtitle2" Class="mb-1">Description</MudText>
+<MudTextField @bind-Value="Model.PublicPassword"
+              Label="@L["Problem.PublicPassword"]"
+              Variant="Variant.Outlined"
+              InputType="InputType.Password"
+              HelperText="@(Model.HasPublicPassword ? L["Problem.PublicPasswordHintSet"].ToString() : L["Problem.PublicPasswordHintEmpty"].ToString())"
+              Class="mb-4" />
+
+<MudText Typo="Typo.subtitle2" Class="mb-1">@L["Common.Description"]</MudText>
 <div class="mb-4">
     <RichTextEditor Value="@Model.Description"
                     ValueChanged="@(v => Model.Description = v)" />
 </div>
 
 <MudText Typo="Typo.subtitle2" Class="mb-1">
-    Location
-    <MudText Typo="Typo.caption" Color="Color.Secondary" Inline="true"> — click map to add points</MudText>
+    @L["Problem.Location"]
+    <MudText Typo="Typo.caption" Color="Color.Secondary" Inline="true"> — @L["Problem.ClickMapHint"]</MudText>
 </MudText>
 
 <LeafletMap Coordinates="Model.Coordinates"
@@ -37,9 +45,9 @@
     <MudSimpleTable Hover="true" Dense="true" Class="mt-2 mb-2">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
+                <th>@L["Problem.CoordIndex"]</th>
+                <th>@L["Problem.CoordLat"]</th>
+                <th>@L["Problem.CoordLng"]</th>
                 <th></th>
             </tr>
         </thead>
@@ -66,7 +74,7 @@
     <MudButton StartIcon="@Icons.Material.Filled.Clear"
                Size="Size.Small"
                OnClick="ClearCoordinates">
-        Clear all
+        @L["Common.ClearAll"]
     </MudButton>
 }
 
@@ -75,9 +83,9 @@
 
     private string CoordinateHint => Model.Coordinates.Count switch
     {
-        1 => "1 point — pin",
-        2 => "2 points — line",
-        _ => $"{Model.Coordinates.Count} points — area"
+        1 => L["Problem.CoordHintPin"],
+        2 => L["Problem.CoordHintLine"],
+        _ => L["Problem.CoordHintArea", Model.Coordinates.Count]
     };
 
     private void AddCoordinate(CoordinateDto coord)

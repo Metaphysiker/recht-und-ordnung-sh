@@ -19,6 +19,7 @@ public class ProblemDto
     public Guid? UserId { get; set; }
     public string? PublicPassword { get; set; }
     public bool HasPublicPassword { get; set; }
+    public string? Email { get; set; }
 }
 
 /// <summary>

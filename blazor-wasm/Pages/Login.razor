@@ -5,10 +5,11 @@
 @inject AuthService AuthService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
     <MudPaper Elevation="3" Class="pa-6">
-        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">Login</MudText>
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">@L["Auth.LoginTitle"]</MudText>
 
         @if (!string.IsNullOrEmpty(_errorMessage))
         {
@@ -17,18 +18,18 @@
 
         <MudForm @ref="_form">
             <MudTextField @bind-Value="_model.Email"
-                          Label="Email"
+                          Label="@L["Common.Email"]"
                           Variant="Variant.Outlined"
                           Required="true"
-                          RequiredError="Email is required"
+                          RequiredError="@L["Auth.EmailRequired"]"
                           InputType="InputType.Email"
                           Class="mb-4" />
 
             <MudTextField @bind-Value="_model.Password"
-                          Label="Password"
+                          Label="@L["Common.Password"]"
                           Variant="Variant.Outlined"
                           Required="true"
-                          RequiredError="Password is required"
+                          RequiredError="@L["Auth.PasswordRequired"]"
                           InputType="InputType.Password"
                           Class="mb-4" />
 
@@ -44,13 +45,13 @@
                 }
                 else
                 {
-                    <span>Login</span>
+                    <span>@L["Auth.LoginTitle"]</span>
                 }
             </MudButton>
 
             <MudText Align="Align.Center">
-                Don't have an account?
-                <MudLink Href="/register" Color="Color.Primary">Register</MudLink>
+                @L["Auth.NoAccount"]
+                <MudLink Href="/register" Color="Color.Primary">@L["Nav.Register"]</MudLink>
             </MudText>
         </MudForm>
     </MudPaper>
@@ -78,12 +79,12 @@
             }
             else
             {
-                _errorMessage = "Invalid email or password";
+                _errorMessage = L["Auth.InvalidCredentials"];
             }
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Login failed: {ex.Message}";
+            _errorMessage = L["Auth.LoginFailed", ex.Message];
         }
         finally
         {

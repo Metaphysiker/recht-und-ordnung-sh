@@ -1,10 +1,11 @@
 @inject ProblemService ProblemService
+@inject IStringLocalizer<SharedResource> L
 
 <MudDialog>
     <DialogContent>
         <CrudSearchList TDto="ProblemDto"
                         TSearchDto="ProblemSearchDto"
-                        Title="Problems"
+                        Title="@L["Problem.PageTitle"]"
                         Service="@ProblemService"
                         TableHeaders="@ProblemTableHeaders"
                         RowTemplate="@ProblemRow"
@@ -21,15 +22,15 @@
 
     private RenderFragment ProblemTableHeaders =>
         @<text>
-            <MudTh>Title</MudTh>
-            <MudTh>Description</MudTh>
+            <MudTh>@L["Problem.ColTitle"]</MudTh>
+            <MudTh>@L["Problem.ColDescription"]</MudTh>
             <MudTh></MudTh>
         </text>;
 
     private RenderFragment<ProblemDto> ProblemRow => (item) =>
         @<text>
-            <MudTd DataLabel="Title">@item.Title</MudTd>
-            <MudTd DataLabel="Description">@(item.Description.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description)</MudTd>
+            <MudTd DataLabel="@L["Problem.ColTitle"]">@item.Title</MudTd>
+            <MudTd DataLabel="@L["Problem.ColDescription"]">@(item.Description.Length > 50 ? item.Description[..50] + "…" : item.Description)</MudTd>
         </text>;
 
     private void OnProblemSelected(HashSet<ProblemDto> problems)

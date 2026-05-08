@@ -4,10 +4,11 @@
 @inject AuthService AuthService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
     <MudPaper Elevation="3" Class="pa-6">
-        <MudText Typo="Typo.h5" Align="Align.Center">Logging out...</MudText>
+        <MudText Typo="Typo.h5" Align="Align.Center">@L["Auth.LoggingOut"]</MudText>
         <MudProgressLinear Indeterminate="true" Class="mt-4" />
     </MudPaper>
 </MudContainer>

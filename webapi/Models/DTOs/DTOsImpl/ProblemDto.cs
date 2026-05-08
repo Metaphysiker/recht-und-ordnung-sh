@@ -14,6 +14,7 @@ public class ProblemDto : IDto
     public Guid? UserId { get; set; }
     public string? PublicPassword { get; set; }
     public bool HasPublicPassword { get; set; }
+    public string? Email { get; set; }
 
     string IDto.GenericName { get; set; } = string.Empty;
 }

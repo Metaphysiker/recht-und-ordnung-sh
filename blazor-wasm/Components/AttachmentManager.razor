@@ -1,14 +1,15 @@
 @inject AttachmentService AttachmentService
 @inject IJSRuntime JS
+@inject IStringLocalizer<SharedResource> L
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
-    <MudText Typo="Typo.h6" Class="flex-grow-1">Attachments</MudText>
+    <MudText Typo="Typo.h6" Class="flex-grow-1">@L["Attachment.Title"]</MudText>
     <MudFileUpload T="IBrowserFile" FilesChanged="UploadAsync" Accept="*/*">
         <ActivatorContent>
             <MudButton Variant="Variant.Outlined"
                        StartIcon="@Icons.Material.Filled.CloudUpload"
                        Disabled="_isUploading">
-                @(_isUploading ? "Uploading..." : "Upload File")
+                @(_isUploading ? L["Attachment.Uploading"].ToString() : L["Attachment.Upload"].ToString())
             </MudButton>
         </ActivatorContent>
     </MudFileUpload>
@@ -30,11 +31,11 @@
                             </MudText>
                         </MudText>
                         <MudIconButton Icon="@Icons.Material.Filled.Download"
-                                       title="Download"
+                                       title="@L["Common.Download"]"
                                        OnClick="@(() => DownloadAsync(attachment))" />
                         <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                        Color="Color.Error"
-                                       title="Delete"
+                                       title="@L["Common.Delete"]"
                                        OnClick="@(() => DeleteAsync(attachment))" />
                     </MudStack>
                 </MudListItem>

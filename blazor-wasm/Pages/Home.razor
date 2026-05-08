@@ -1,7 +1,60 @@
-﻿@page "/"
+@page "/"
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Home</PageTitle>
+<PageTitle>@L["Home.Title"]</PageTitle>
 
-<h1>Hello, world!</h1>
+<MudPaper Elevation="1" Class="pa-8 mb-8" Style="border-radius: 16px;">
+    <MudStack Spacing="4">
+        <MudText Typo="Typo.h3" Style="font-weight: 700;">
+            @L["Home.HeroTitle"]
+        </MudText>
+        <MudText Typo="Typo.h6" Style="font-weight: 400;">
+            @L["Home.HeroSubtitle"]
+        </MudText>
+        <MudText Typo="Typo.body1">
+            @L["Home.HeroDescription"]
+        </MudText>
+        <div>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       StartIcon="@Icons.Material.Filled.AddAlert"
+                       Href="/public/problems/new"
+                       Style="font-weight: 600; margin-top: 8px;">
+                @L["Home.CtaButton"]
+            </MudButton>
+        </div>
+    </MudStack>
+</MudPaper>
 
-Welcome to your new app.
+<MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4">@L["Home.HowItWorksTitle"]</MudText>
+
+<MudGrid Spacing="3" Class="mb-6">
+    <MudItem xs="12" sm="6">
+        <MudPaper Class="pa-5" Elevation="1" Style="height: 100%; border-radius: 12px;">
+            <MudStack AlignItems="AlignItems.Center" Spacing="3">
+                <MudIcon Icon="@Icons.Material.Filled.EditNote" Size="Size.Large" />
+                <MudText Typo="Typo.subtitle1" Align="Align.Center" Style="font-weight: 600;">
+                    @L["Home.Step1Title"]
+                </MudText>
+                <MudText Typo="Typo.body2" Align="Align.Center">
+                    @L["Home.Step1Text"]
+                </MudText>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="6">
+        <MudPaper Class="pa-5" Elevation="1" Style="height: 100%; border-radius: 12px;">
+            <MudStack AlignItems="AlignItems.Center" Spacing="3">
+                <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Size="Size.Large" />
+                <MudText Typo="Typo.subtitle1" Align="Align.Center" Style="font-weight: 600;">
+                    @L["Home.Step2Title"]
+                </MudText>
+                <MudText Typo="Typo.body2" Align="Align.Center">
+                    @L["Home.Step2Text"]
+                </MudText>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+

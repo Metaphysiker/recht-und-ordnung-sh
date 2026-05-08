@@ -1,4 +1,4 @@
-# Recht und Ordnung SH
+# Recht und Ordnung - Schaffhausen
 
 A Blazor WebAssembly application with ASP.NET Core backend and PostgreSQL database.
 

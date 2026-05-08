@@ -6,6 +6,7 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject IStringLocalizer<SharedResource> L
 
 <PageTitle>@(_problem?.Title ?? "Problem")</PageTitle>
 
@@ -13,17 +14,17 @@
 {
     <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mt-16">
         <MudPaper Class="pa-6" Elevation="3">
-            <MudText Typo="Typo.h6" GutterBottom="true">Access restricted</MudText>
+            <MudText Typo="Typo.h6" GutterBottom="true">@L["Public.AccessRestricted"]</MudText>
             <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
-                Enter the password to view this problem.
+                @L["Public.EnterPasswordHint"]
             </MudText>
 
             <MudTextField @bind-Value="_password"
-                          Label="Password"
+                          Label="@L["Public.Password"]"
                           Variant="Variant.Outlined"
                           InputType="InputType.Password"
                           Error="_wrongPassword"
-                          ErrorText="Incorrect password."
+                          ErrorText="@L["Public.IncorrectPassword"]"
                           Class="mb-4"
                           OnKeyDown="OnKeyDown" />
 
@@ -36,7 +37,7 @@
                 {
                     <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
                 }
-                Unlock
+                @L["Public.Unlock"]
             </MudButton>
         </MudPaper>
     </MudContainer>
@@ -53,11 +54,11 @@ else if (_state == State.Loaded)
             @if (_isDownloading)
             {
                 <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                <span>Generating...</span>
+                <span>@L["Common.Generating"]</span>
             }
             else
             {
-                <span>Save as PDF</span>
+                <span>@L["Common.SaveAsPdf"]</span>
             }
         </MudButton>
     </MudStack>
@@ -76,11 +77,11 @@ else if (_state == State.Loaded)
 
     <MudDivider Class="mb-4" />
 
-    <MudText Typo="Typo.h6" GutterBottom="true">Events</MudText>
+    <MudText Typo="Typo.h6" GutterBottom="true">@L["Problem.Events"]</MudText>
 
     @if (!_events.Any())
     {
-        <MudText Typo="Typo.body2" Color="Color.Secondary">No events recorded for this problem.</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">@L["Problem.NoEvents"]</MudText>
     }
     else
     {
@@ -105,11 +106,11 @@ else if (_state == State.Loaded)
 }
 else if (_state == State.NotFound)
 {
-    <MudAlert Severity="Severity.Error">Problem not found.</MudAlert>
+    <MudAlert Severity="Severity.Error">@L["Problem.NotFound"]</MudAlert>
 }
 else if (_state == State.NotPublic)
 {
-    <MudAlert Severity="Severity.Warning">This problem is not publicly accessible.</MudAlert>
+    <MudAlert Severity="Severity.Warning">@L["Public.NotPublic"]</MudAlert>
 }
 
 @code {

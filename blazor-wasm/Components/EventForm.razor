@@ -1,5 +1,7 @@
+@inject IStringLocalizer<SharedResource> L
+
 <MudTextField @bind-Value="Model.Title"
-              Label="Title"
+              Label="@L["Common.Title"]"
               Variant="Variant.Outlined"
               Required="true"
               Class="mb-4" />
@@ -7,17 +9,17 @@
 <MudStack Row="true" Spacing="2" Class="mb-4">
     <MudDatePicker Date="@Model.EventDate.UtcDateTime"
                    DateChanged="@(d => Model.EventDate = d.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(d.Value.Date + Model.EventDate.UtcDateTime.TimeOfDay, DateTimeKind.Utc)) : Model.EventDate)"
-                   Label="Date (UTC)"
+                   Label="@L["Event.Date"]"
                    Variant="Variant.Outlined"
                    Required="true" />
     <MudTimePicker Time="@Model.EventDate.UtcDateTime.TimeOfDay"
                    TimeChanged="@(t => Model.EventDate = t.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(Model.EventDate.UtcDateTime.Date + t.Value, DateTimeKind.Utc)) : Model.EventDate)"
-                   Label="Time (UTC)"
+                   Label="@L["Event.Time"]"
                    Variant="Variant.Outlined"
                    AmPm="false" />
 </MudStack>
 
-<MudText Typo="Typo.caption" Class="mb-1 mt-2">Description</MudText>
+<MudText Typo="Typo.caption" Class="mb-1 mt-2">@L["Common.Description"]</MudText>
 <RichTextEditor @bind-Value="Model.Description" />
 
 <ProblemSelectorField @bind-ProblemId="Model.ProblemId" />

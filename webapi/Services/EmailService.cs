@@ -35,7 +35,7 @@ public class EmailService : IEmailService
                 Body = $@"
                     <html>
                         <body>
-                            <h2>Login to Recht und Ordnung SH</h2>
+                            <h2>Login to Recht und Ordnung - Schaffhausen</h2>
                             <p>Click the link below to sign in:</p>
                             <p><a href=""{magicLink}"">Sign In</a></p>
                             <p>This link will expire in 15 minutes.</p>

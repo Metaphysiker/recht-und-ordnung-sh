@@ -8,6 +8,7 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
 <PageTitle>@(_problem?.Title ?? "Problem Detail")</PageTitle>
@@ -16,7 +17,7 @@
     <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
         <MudButton StartIcon="@Icons.Material.Filled.ArrowBack"
                    OnClick="@(() => Navigation.NavigateTo("/problems"))">
-            Back
+            @L["Common.Back"]
         </MudButton>
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
@@ -26,11 +27,11 @@
             @if (_isDownloading)
             {
                 <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                <span>Generating...</span>
+                <span>@L["Common.Generating"]</span>
             }
             else
             {
-                <span>Save as PDF</span>
+                <span>@L["Common.SaveAsPdf"]</span>
             }
         </MudButton>
     </MudStack>
@@ -42,7 +43,7 @@
 }
 else if (_problem == null)
 {
-    <MudAlert Severity="Severity.Error">Problem not found.</MudAlert>
+    <MudAlert Severity="Severity.Error">@L["Problem.NotFound"]</MudAlert>
 }
 else
 {
@@ -63,19 +64,19 @@ else
     <MudDivider Class="mb-6 no-print" />
 
     <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-        <MudText Typo="Typo.h6">Events</MudText>
+        <MudText Typo="Typo.h6">@L["Problem.Events"]</MudText>
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
                    StartIcon="@Icons.Material.Filled.Add"
                    OnClick="AddEventAsync"
                    Class="no-print">
-            Add Event
+            @L["Problem.AddEvent"]
         </MudButton>
     </MudStack>
 
     @if (!_events.Any())
     {
-        <MudText Typo="Typo.body2" Color="Color.Secondary">No events recorded for this problem.</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">@L["Problem.NoEvents"]</MudText>
     }
     else
     {
@@ -169,7 +170,7 @@ else
         };
 
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        dialog = await DialogService.ShowAsync<CrudDialog<EventDto>>("Create Event", parameters, options);
+        dialog = await DialogService.ShowAsync<CrudDialog<EventDto>>($"{L["Common.Create"]}: {L["Event.DialogTitle"]}", parameters, options);
     }
 
     private async Task DownloadPdfAsync()

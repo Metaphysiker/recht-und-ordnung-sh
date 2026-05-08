@@ -1,10 +1,11 @@
 @inject ProblemService ProblemService
 @inject IDialogService DialogService
+@inject IStringLocalizer<SharedResource> L
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
     <div style="flex: 1">
-        <MudTextField Value="@(_selectedProblem?.Title ?? (ProblemId.HasValue ? "Loading..." : string.Empty))"
-                      Label="Problem"
+        <MudTextField Value="@(_selectedProblem?.Title ?? (ProblemId.HasValue ? L["Common.Loading"].ToString() : string.Empty))"
+                      Label="@L["Problem.DialogTitle"]"
                       Variant="Variant.Outlined"
                       ReadOnly="true"
                       Adornment="@(ProblemId.HasValue ? Adornment.End : Adornment.None)"
@@ -14,7 +15,7 @@
     <MudButton Variant="Variant.Outlined"
                StartIcon="@Icons.Material.Filled.Search"
                OnClick="OpenProblemPicker">
-        Select
+        @L["Common.Select"]
     </MudButton>
 </MudStack>
 
@@ -42,7 +43,7 @@
     private async Task OpenProblemPicker()
     {
         var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseOnEscapeKey = true };
-        var dialog = await DialogService.ShowAsync<ProblemPickerDialog>("Select Problem", options);
+        var dialog = await DialogService.ShowAsync<ProblemPickerDialog>(L["Problem.SelectProblem"], options);
         var result = await dialog.Result;
         if (result != null && !result.Canceled && result.Data is ProblemDto problem)
         {

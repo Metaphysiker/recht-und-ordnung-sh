@@ -3,41 +3,42 @@
 @using blazor_wasm.Services
 @using blazor_wasm.Components
 @inject ProblemService ProblemService
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Problems</PageTitle>
+<PageTitle>@L["Problem.PageTitle"]</PageTitle>
 
 <CrudPage TDto="ProblemDto"
           TSearchDto="ProblemSearchDto"
-          Title="Problems"
-          DialogTitle="Problem"
+          Title="@L["Problem.PageTitle"]"
+          DialogTitle="@L["Problem.DialogTitle"]"
           Service="@ProblemService"
           CreateNewInstance="@(() => new ProblemDto())"
           GetId="@(item => item.Id)"
-          FormContent="@ProblemForm"
+          FormContent="@ProblemFormContent"
           TableHeaders="@ProblemTableHeaders"
           RowTemplate="@ProblemRow" />
 
 @code {
     private RenderFragment ProblemTableHeaders =>
         @<text>
-            <MudTh>Title</MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh>Events Count</MudTh>
-            <MudTh Style="text-align: right;">Actions</MudTh>
+            <MudTh>@L["Problem.ColTitle"]</MudTh>
+            <MudTh>@L["Problem.ColDescription"]</MudTh>
+            <MudTh>@L["Problem.ColEventCount"]</MudTh>
+            <MudTh Style="text-align: right;">@L["Common.Actions"]</MudTh>
         </text>;
 
     private RenderFragment<ProblemDto> ProblemRow => (item) =>
         @<text>
-            <MudTd DataLabel="Title">
+            <MudTd DataLabel="@L["Problem.ColTitle"]">
                 <MudLink Href="@($"/problems/{item.Id}")">@item.Title</MudLink>
             </MudTd>
-            <MudTd DataLabel="Description">
-                @(item.Description.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description)
+            <MudTd DataLabel="@L["Problem.ColDescription"]">
+                @(item.Description.Length > 50 ? item.Description[..50] + "…" : item.Description)
             </MudTd>
-            <MudTd DataLabel="Events Count">@item.EventIds.Count</MudTd>
+            <MudTd DataLabel="@L["Problem.ColEventCount"]">@item.EventIds.Count</MudTd>
         </text>;
 
-    private RenderFragment<ProblemDto> ProblemForm => (model) =>
+    private RenderFragment<ProblemDto> ProblemFormContent => (model) =>
         @<ProblemForm Model="model" />;
 }

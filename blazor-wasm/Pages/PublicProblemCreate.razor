@@ -1,0 +1,303 @@
+@page "/public/problems/new"
+@layout PublicLayout
+@using blazor_wasm.Models
+@using blazor_wasm.Layout
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["Public.SubmitProblem"]</PageTitle>
+
+<MudText Typo="Typo.h5" GutterBottom="true">@L["Public.SubmitProblem"]</MudText>
+<MudText Typo="Typo.body2" Class="mb-6">@L["Public.SubmitProblemHint"]</MudText>
+
+<MudPaper Class="pa-4" Elevation="1">
+    <MudTextField @bind-Value="_model.Title"
+                  Label="@L["Common.Title"]"
+                  Variant="Variant.Outlined"
+                  Required="true"
+                  Class="mb-4" />
+
+    <MudTextField @bind-Value="_model.Email"
+                  Label="@L["Common.Email"]"
+                  Variant="Variant.Outlined"
+                  InputType="InputType.Email"
+                  HelperText="@L["Problem.EmailHint"]"
+                  Class="mb-4" />
+
+    <MudText Typo="Typo.subtitle2" Class="mb-1">@L["Common.Description"]</MudText>
+    <div class="mb-4">
+        <RichTextEditor Value="@_model.Description"
+                        ValueChanged="@(v => _model.Description = v)" />
+    </div>
+
+    <MudText Typo="Typo.subtitle2" Class="mb-1">
+        @L["Problem.Location"]
+        <MudText Typo="Typo.caption" Inline="true"> — @L["Problem.ClickMapHint"]</MudText>
+    </MudText>
+
+    <LeafletMap Coordinates="_model.Coordinates"
+                Editable="true"
+                Height="280px"
+                OnMapClick="AddCoordinate"
+                OnMarkerClick="RemoveCoordinate" />
+
+    @if (_model.Coordinates.Count > 0)
+    {
+        <MudText Typo="Typo.caption" Class="mt-1 mb-1">@CoordinateHint</MudText>
+        <MudButton StartIcon="@Icons.Material.Filled.Clear"
+                   Size="Size.Small"
+                   OnClick="@(() => { _model.Coordinates.Clear(); StateHasChanged(); })">
+            @L["Common.ClearAll"]
+        </MudButton>
+    }
+
+    <MudDivider Class="my-4" />
+
+    <MudText Typo="Typo.subtitle2" Class="mb-1">@L["Public.Attachments"]</MudText>
+    <MudText Typo="Typo.caption" Class="mb-3">@L["Public.AttachmentsHint"]</MudText>
+
+    <div style="position: relative; display: inline-block;" class="mb-3">
+        <MudButton StartIcon="@Icons.Material.Filled.AttachFile" Variant="Variant.Outlined">
+            @L["Common.Select"]
+        </MudButton>
+        <InputFile OnChange="OnFilesSelected" multiple accept="image/*,application/pdf,.pdf"
+                   style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;" />
+    </div>
+
+    @if (_selectedFiles.Count > 0)
+    {
+        <MudList T="SelectedFile" Dense="true">
+            @foreach (var f in _selectedFiles)
+            {
+                <MudListItem T="SelectedFile" Icon="@(f.IsImage ? Icons.Material.Filled.Image : Icons.Material.Filled.InsertDriveFile)">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Style="width:100%">
+                        <MudText Typo="Typo.body2">@f.Name <MudText Typo="Typo.caption" Inline="true">(@FormatBytes(f.Size))</MudText></MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                       Size="Size.Small"
+                                       OnClick="@(() => RemoveFile(f))" />
+                    </MudStack>
+                </MudListItem>
+            }
+        </MudList>
+    }
+
+    @if (_error != null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-4">@_error</MudAlert>
+    }
+
+    @if (_submitting)
+    {
+        <MudText Typo="Typo.caption" Class="mt-3">
+            @(_uploadStep == UploadStep.CreatingProblem
+                ? L["Public.Submit"]
+                : L["Public.UploadingFiles", _uploadedCount, _selectedFiles.Count])
+        </MudText>
+        <MudProgressLinear Indeterminate="_uploadStep == UploadStep.CreatingProblem"
+                           Value="@(_uploadStep == UploadStep.UploadingFiles && _selectedFiles.Count > 0
+                               ? (double)_uploadedCount / _selectedFiles.Count * 100 : 0)"
+                           Class="mb-2" />
+    }
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               FullWidth="true"
+               Disabled="_submitting || string.IsNullOrWhiteSpace(_model.Title)"
+               OnClick="SubmitAsync"
+               Class="mt-4">
+        @if (_submitting)
+        {
+            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+        }
+        @L["Public.Submit"]
+    </MudButton>
+</MudPaper>
+
+@code {
+    private PublicProblemModel _model = new();
+    private List<SelectedFile> _selectedFiles = [];
+    private bool _submitting;
+    private string? _error;
+    private UploadStep _uploadStep;
+    private int _uploadedCount;
+
+    private static readonly HashSet<string> ImageMimeTypes =
+    [
+        "image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp"
+    ];
+
+    private enum UploadStep { CreatingProblem, UploadingFiles }
+
+    private class PublicProblemModel
+    {
+        public string Title { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public List<CoordinateDto> Coordinates { get; set; } = [];
+    }
+
+    private class SelectedFile
+    {
+        public required IBrowserFile BrowserFile { get; init; }
+        public required string Name { get; init; }
+        public required long Size { get; init; }
+        public required bool IsImage { get; init; }
+    }
+
+    private string CoordinateHint => _model.Coordinates.Count switch
+    {
+        1 => L["Problem.CoordHintPin"],
+        2 => L["Problem.CoordHintLine"],
+        _ => L["Problem.CoordHintArea", _model.Coordinates.Count]
+    };
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024} KB";
+        return $"{bytes / (1024 * 1024):F1} MB";
+    }
+
+    private void AddCoordinate(CoordinateDto coord)
+    {
+        _model.Coordinates.Add(coord);
+        StateHasChanged();
+    }
+
+    private void RemoveCoordinate(int index)
+    {
+        _model.Coordinates.RemoveAt(index);
+        StateHasChanged();
+    }
+
+    private void OnFilesSelected(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles(20))
+        {
+            if (_selectedFiles.Any(f => f.Name == file.Name && f.Size == file.Size)) continue;
+            _selectedFiles.Add(new SelectedFile
+            {
+                BrowserFile = file,
+                Name = file.Name,
+                Size = file.Size,
+                IsImage = ImageMimeTypes.Contains(file.ContentType)
+            });
+        }
+        StateHasChanged();
+    }
+
+    private void RemoveFile(SelectedFile file)
+    {
+        _selectedFiles.Remove(file);
+        StateHasChanged();
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_model.Title)) return;
+
+        _submitting = true;
+        _error = null;
+        _uploadStep = UploadStep.CreatingProblem;
+        _uploadedCount = 0;
+
+        try
+        {
+            var payload = new
+            {
+                Title = _model.Title,
+                Email = _model.Email,
+                Description = _model.Description,
+                Coordinates = _model.Coordinates
+            };
+
+            var response = await Http.PostAsJsonAsync("api/Problem/public", payload);
+            if (!response.IsSuccessStatusCode)
+            {
+                _error = L["Public.SubmitFailed"];
+                return;
+            }
+
+            var created = await response.Content.ReadFromJsonAsync<ProblemDto>();
+            if (created?.Id == null)
+            {
+                _error = L["Public.SubmitFailed"];
+                return;
+            }
+
+            var problemId = created.Id.Value;
+
+            if (_selectedFiles.Count > 0)
+            {
+                _uploadStep = UploadStep.UploadingFiles;
+                bool anyFailed = false;
+
+                foreach (var file in _selectedFiles)
+                {
+                    try
+                    {
+                        await UploadFileAsync(file, problemId);
+                    }
+                    catch
+                    {
+                        anyFailed = true;
+                    }
+                    _uploadedCount++;
+                    StateHasChanged();
+                }
+
+                if (anyFailed)
+                    _error = L["Public.UploadFailed"];
+            }
+
+            Navigation.NavigateTo("/public/thank-you");
+        }
+        catch
+        {
+            _error = L["Public.SubmitFailed"];
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+
+    private async Task UploadFileAsync(SelectedFile file, Guid problemId)
+    {
+        const long maxBytes = 50 * 1024 * 1024;
+        byte[] fileBytes;
+        string contentType = file.BrowserFile.ContentType;
+
+        using (var stream = file.BrowserFile.OpenReadStream(maxBytes))
+        {
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            fileBytes = ms.ToArray();
+        }
+
+        string fileName = file.Name;
+
+        if (file.IsImage)
+        {
+            var result = await JS.InvokeAsync<CompressResult>(
+                "ImageCompressor.compress", fileBytes, contentType, 1920, 1080, 0.85);
+            fileBytes = Convert.FromBase64String(result.Base64);
+            contentType = result.MimeType;
+            if (contentType == "image/jpeg" && !fileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
+                fileName = Path.GetFileNameWithoutExtension(fileName) + ".jpg";
+        }
+
+        using var content = new MultipartFormDataContent();
+        content.Add(new ByteArrayContent(fileBytes) { Headers = { ContentType = new(contentType) } }, "file", fileName);
+        content.Add(new StringContent(problemId.ToString()), "parentId");
+        content.Add(new StringContent("0"), "parentType"); // 0 = Problem
+
+        await Http.PostAsync("api/Attachment/upload", content);
+    }
+
+    private record CompressResult(string Base64, string MimeType);
+}

@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
+@inject IStringLocalizer<SharedResource> L
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -7,24 +8,24 @@
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudText Typo="Typo.h6">Recht und Ordnung SH</MudText>
+        <MudText Typo="Typo.h6">Recht und Ordnung - Schaffhausen</MudText>
         <MudSpacer />
         <AuthorizeView>
             <Authorized>
                 <MudText Typo="Typo.body1" Class="mr-4">
-                    Welcome, @context.User.Claims.FirstOrDefault(c => c.Type == "firstName")?.Value!
+                    @L["Layout.Welcome", context.User.Claims.FirstOrDefault(c => c.Type == "firstName")?.Value ?? ""]
                 </MudText>
-                <MudButton Href="/logout" Variant="Variant.Text" Color="Color.Inherit">Logout</MudButton>
+                <MudButton Href="/logout" Variant="Variant.Text" Color="Color.Inherit">@L["Nav.Logout"]</MudButton>
             </Authorized>
             <NotAuthorized>
-                <MudButton Href="/login" Variant="Variant.Text" Color="Color.Inherit">Login</MudButton>
-                <MudButton Href="/register" Variant="Variant.Text" Color="Color.Inherit">Register</MudButton>
+                <MudButton Href="/login" Variant="Variant.Text" Color="Color.Inherit">@L["Nav.Login"]</MudButton>
+                <MudButton Href="/register" Variant="Variant.Text" Color="Color.Inherit">@L["Nav.Register"]</MudButton>
             </NotAuthorized>
         </AuthorizeView>
     </MudAppBar>
     <MudDrawer Open="true" Variant="@DrawerVariant.Persistent" Elevation="2" ClipMode="DrawerClipMode.Always">
         <MudDrawerHeader>
-            <MudText Typo="Typo.h6">Navigation</MudText>
+            <MudText Typo="Typo.h6">@L["Layout.Navigation"]</MudText>
         </MudDrawerHeader>
         <NavMenu />
     </MudDrawer>

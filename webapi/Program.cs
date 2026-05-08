@@ -26,6 +26,7 @@ builder.Services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(
     new AmazonS3Config { RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(awsRegion) }
 ));
 builder.Services.AddSingleton<IS3Service, S3Service>();
+builder.Services.AddScoped<webapi.Pdf.ProblemPdfGenerator>();
 
 // Add PostgreSQL DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

@@ -6,10 +6,9 @@ using webapi.Controllers;
 using webapi.Data;
 using webapi.Models.DTOs.DTOsImpl;
 using webapi.Models.ModelsImpl;
-using QuestPDF.Fluent;
 using webapi.Pdf;
 using webapi.Search;
-using webapi.Services;
+
 
 namespace webapi.Controllers.ControllersImpl;
 
@@ -17,14 +16,12 @@ namespace webapi.Controllers.ControllersImpl;
 [Route("api/[controller]")]
 public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, ProblemSearchDto>
 {
-    private readonly IS3Service _s3;
-    private readonly ILogger<ProblemController> _logger;
+    private readonly ProblemPdfGenerator _pdfGenerator;
     private readonly PasswordHasher<Problem> _hasher = new();
 
-    public ProblemController(ApplicationDbContext context, IS3Service s3, ILogger<ProblemController> logger) : base(context)
+    public ProblemController(ApplicationDbContext context, ProblemPdfGenerator pdfGenerator) : base(context)
     {
-        _s3 = s3;
-        _logger = logger;
+        _pdfGenerator = pdfGenerator;
     }
 
     protected override Problem MapToEntity(ProblemDto dto, Problem? existingEntity = null)
@@ -133,7 +130,8 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
         if (problem == null)
             return NotFound();
 
-        return await BuildPdfResponse(problem);
+        var (bytes, filename) = await _pdfGenerator.GenerateAsync(problem);
+        return File(bytes, "application/pdf", filename);
     }
 
     [AllowAnonymous]
@@ -155,57 +153,9 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
         if (result == PasswordVerificationResult.Failed)
             return Unauthorized();
 
-        return await BuildPdfResponse(problem);
+        var (bytes, filename) = await _pdfGenerator.GenerateAsync(problem);
+        return File(bytes, "application/pdf", filename);
     }
-
-    private async Task<IActionResult> BuildPdfResponse(Problem problem)
-    {
-        var events = problem.Events.OrderBy(e => e.EventDate).ToList();
-
-        byte[]? mapImage = null;
-        if (problem.Coordinates.Count > 0)
-            mapImage = await MapImageGenerator.GenerateAsync(problem.Coordinates);
-
-        _logger.LogInformation("PDF: problem has {Count} attachments: {Types}",
-            problem.Attachments.Count,
-            string.Join(", ", problem.Attachments.Select(a => $"{a.FileName}={a.ContentType}")));
-
-        var imageAttachments = problem.Attachments
-            .Where(a => a.ContentType.StartsWith("image/") || IsImageFile(a.FileName))
-            .OrderBy(a => a.CreatedAt)
-            .ToList();
-
-        _logger.LogInformation("PDF: {Count} image attachments after filter", imageAttachments.Count);
-
-        var images = (await Task.WhenAll(
-            imageAttachments.Select(async a =>
-            {
-                using var stream = await _s3.DownloadAsync(a.S3Key);
-                var data = ReadToBytes(stream);
-                _logger.LogInformation("PDF: downloaded {File} — {Bytes} bytes", a.FileName, data.Length);
-                return (a.FileName, Data: data);
-            })
-        )).ToList();
-
-        var document = new ProblemPdfDocument(problem, events, mapImage, images);
-        var pdfBytes = document.GeneratePdf();
-
-        var filename = $"{problem.Title.Replace(" ", "_")}.pdf";
-        return File(pdfBytes, "application/pdf", filename);
-    }
-
-    private static byte[] ReadToBytes(Stream stream)
-    {
-        using var ms = new MemoryStream();
-        stream.CopyTo(ms);
-        return ms.ToArray();
-    }
-
-    private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
-        { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff", ".tif" };
-
-    private static bool IsImageFile(string fileName) =>
-        ImageExtensions.Contains(Path.GetExtension(fileName));
 }
 
 public record UnlockRequest(string Password);

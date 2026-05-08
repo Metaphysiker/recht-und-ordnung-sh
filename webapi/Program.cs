@@ -1,4 +1,5 @@
 using System.Text;
+using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,13 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Add AWS S3
+var awsRegion = builder.Configuration["AWS_REGION"] ?? builder.Configuration["AWS_DEFAULT_REGION"] ?? "eu-central-1";
+builder.Services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(
+    new AmazonS3Config { RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(awsRegion) }
+));
+builder.Services.AddSingleton<IS3Service, S3Service>();
 
 // Add PostgreSQL DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -114,6 +122,10 @@ using (var scope = app.Services.CreateScope())
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
     await DatabaseSeeder.SeedAdminUserAsync(userManager, roleManager, logger, app.Configuration);
+
+    // Ensure S3 bucket exists
+    var s3 = app.Services.GetRequiredService<IS3Service>();
+    await s3.EnsureBucketExistsAsync();
 }
 
 // Configure the HTTP request pipeline.

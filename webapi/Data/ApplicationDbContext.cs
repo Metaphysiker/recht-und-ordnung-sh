@@ -18,6 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public DbSet<Problem> Problems { get; set; }
     public DbSet<Event> Events { get; set; }
+    public DbSet<Attachment> Attachments { get; set; }
     public DbSet<MagicLink> MagicLinks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -30,5 +31,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
         });
 
         builder.Entity<Problem>().OwnsMany(p => p.Coordinates, b => b.ToJson());
+
+        builder.Entity<Attachment>()
+            .HasOne(a => a.Problem)
+            .WithMany(p => p.Attachments)
+            .HasForeignKey(a => a.ProblemId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -4,6 +4,13 @@
               Required="true"
               Class="mb-4" />
 
+<MudTextField @bind-Value="Model.PublicPassword"
+              Label="Public access password"
+              Variant="Variant.Outlined"
+              InputType="InputType.Password"
+              HelperText="@(Model.HasPublicPassword ? "Password is set — leave blank to keep it, or enter a new one to change it." : "Set a password to allow public access. Leave blank for no public access.")"
+              Class="mb-4" />
+
 <MudText Typo="Typo.subtitle2" Class="mb-1">Description</MudText>
 <div class="mb-4">
     <RichTextEditor Value="@Model.Description"

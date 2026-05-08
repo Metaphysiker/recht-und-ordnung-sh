@@ -17,6 +17,8 @@ public class ProblemDto
     public List<Guid> EventIds { get; set; } = new List<Guid>();
     public List<CoordinateDto> Coordinates { get; set; } = [];
     public Guid? UserId { get; set; }
+    public string? PublicPassword { get; set; }
+    public bool HasPublicPassword { get; set; }
 }
 
 /// <summary>

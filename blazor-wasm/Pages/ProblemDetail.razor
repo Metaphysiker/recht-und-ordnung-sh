@@ -47,7 +47,7 @@ else if (_problem == null)
 else
 {
     <MudText Typo="Typo.h4" GutterBottom="true">@_problem.Title</MudText>
-    <MudText Typo="Typo.body1" Class="mb-4">@_problem.Description</MudText>
+    <div class="mb-4">@((MarkupString)_problem.Description)</div>
 
     @if (_problem.Coordinates.Count > 0)
     {

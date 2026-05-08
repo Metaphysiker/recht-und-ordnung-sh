@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Controllers;
 using webapi.Data;
-using webapi.Models.DTOs;
 using webapi.Models.DTOs.DTOsImpl;
 using webapi.Models.ModelsImpl;
 using QuestPDF.Fluent;
@@ -13,15 +13,13 @@ using webapi.Services;
 
 namespace webapi.Controllers.ControllersImpl;
 
-/// <summary>
-/// Controller for managing Problem entities
-/// </summary>
 [Authorize]
 [Route("api/[controller]")]
 public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, ProblemSearchDto>
 {
     private readonly IS3Service _s3;
     private readonly ILogger<ProblemController> _logger;
+    private readonly PasswordHasher<Problem> _hasher = new();
 
     public ProblemController(ApplicationDbContext context, IS3Service s3, ILogger<ProblemController> logger) : base(context)
     {
@@ -29,9 +27,6 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
         _logger = logger;
     }
 
-    /// <summary>
-    /// Map DTO to Entity
-    /// </summary>
     protected override Problem MapToEntity(ProblemDto dto, Problem? existingEntity = null)
     {
         var entity = existingEntity ?? new Problem();
@@ -43,12 +38,14 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
             .Select(c => new Coordinate { Latitude = c.Latitude, Longitude = c.Longitude })
             .ToList();
 
+        if (!string.IsNullOrWhiteSpace(dto.PublicPassword))
+            entity.PublicPassword = _hasher.HashPassword(entity, dto.PublicPassword);
+        else if (dto.PublicPassword == string.Empty)
+            entity.PublicPassword = null;
+
         return entity;
     }
 
-    /// <summary>
-    /// Map Entity to DTO
-    /// </summary>
     protected override ProblemDto MapToDto(Problem entity)
     {
         return new ProblemDto
@@ -60,16 +57,13 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
             Coordinates = entity.Coordinates
                 .Select(c => new CoordinateDto { Latitude = c.Latitude, Longitude = c.Longitude })
                 .ToList(),
-            UserId = entity.UserId
+            UserId = entity.UserId,
+            HasPublicPassword = entity.PublicPassword != null
         };
     }
 
-    /// <summary>
-    /// Override to implement custom search logic
-    /// </summary>
     protected override IQueryable<Problem> ApplySearchFilter(IQueryable<Problem> query, ProblemSearchDto search)
     {
-        // Include related Events for mapping
         query = query.Include(p => p.Events);
 
         if (!string.IsNullOrWhiteSpace(search.SearchTerm))
@@ -82,14 +76,6 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
         return query;
     }
 
-    [AllowAnonymous]
-    public override async Task<ActionResult<PaginationDto<ProblemDto>>> Search([FromBody] ProblemSearchDto search)
-        => await base.Search(search);
-
-    /// <summary>
-    /// Override GetById to include related Events
-    /// </summary>
-    [AllowAnonymous]
     public override async Task<ActionResult<ProblemDto>> GetById(Guid id)
     {
         var entity = await _dbSet
@@ -97,16 +83,45 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (entity == null)
-        {
             return NotFound(new { message = $"Entity with ID {id} not found" });
-        }
 
         return Ok(MapToDto(entity));
     }
 
-    /// <summary>
-    /// Generate a PDF report for a problem including its events
-    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("{id}/unlock")]
+    public async Task<IActionResult> Unlock(Guid id, [FromBody] UnlockRequest request)
+    {
+        var problem = await _dbSet
+            .Include(p => p.Events)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (problem == null)
+            return NotFound();
+
+        if (problem.PublicPassword == null)
+            return Forbid();
+
+        var result = _hasher.VerifyHashedPassword(problem, problem.PublicPassword, request.Password);
+        if (result == PasswordVerificationResult.Failed)
+            return Unauthorized();
+
+        var events = problem.Events
+            .OrderBy(e => e.EventDate)
+            .Select(e => new EventDto
+            {
+                Id = e.Id,
+                EventDate = e.EventDate,
+                Title = e.Title,
+                Description = e.Description,
+                ProblemId = e.ProblemId,
+                UserId = e.UserId
+            })
+            .ToList();
+
+        return Ok(new { Problem = MapToDto(problem), Events = events });
+    }
+
     [HttpGet("{id}/pdf")]
     public async Task<IActionResult> GetPdf(Guid id)
     {
@@ -118,6 +133,33 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
         if (problem == null)
             return NotFound();
 
+        return await BuildPdfResponse(problem);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("{id}/pdf-public")]
+    public async Task<IActionResult> GetPdfPublic(Guid id, [FromBody] UnlockRequest request)
+    {
+        var problem = await _dbSet
+            .Include(p => p.Events)
+            .Include(p => p.Attachments)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (problem == null)
+            return NotFound();
+
+        if (problem.PublicPassword == null)
+            return Forbid();
+
+        var result = _hasher.VerifyHashedPassword(problem, problem.PublicPassword, request.Password);
+        if (result == PasswordVerificationResult.Failed)
+            return Unauthorized();
+
+        return await BuildPdfResponse(problem);
+    }
+
+    private async Task<IActionResult> BuildPdfResponse(Problem problem)
+    {
         var events = problem.Events.OrderBy(e => e.EventDate).ToList();
 
         byte[]? mapImage = null;
@@ -165,3 +207,5 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
     private static bool IsImageFile(string fileName) =>
         ImageExtensions.Contains(Path.GetExtension(fileName));
 }
+
+public record UnlockRequest(string Password);

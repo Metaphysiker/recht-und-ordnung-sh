@@ -1,24 +1,66 @@
 @page "/public/problems/{Id:guid}"
 @layout PublicLayout
 @using blazor_wasm.Models
-@using blazor_wasm.Services
 @using blazor_wasm.Layout
-@inject ProblemService ProblemService
-@inject EventService EventService
+@using System.Net
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject IJSRuntime JS
 
 <PageTitle>@(_problem?.Title ?? "Problem")</PageTitle>
 
-@if (_loading)
+@if (_state == State.EnteringPassword)
 {
-    <MudProgressCircular Indeterminate="true" />
+    <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mt-16">
+        <MudPaper Class="pa-6" Elevation="3">
+            <MudText Typo="Typo.h6" GutterBottom="true">Access restricted</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                Enter the password to view this problem.
+            </MudText>
+
+            <MudTextField @bind-Value="_password"
+                          Label="Password"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Password"
+                          Error="_wrongPassword"
+                          ErrorText="Incorrect password."
+                          Class="mb-4"
+                          OnKeyDown="OnKeyDown" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Disabled="_unlocking"
+                       OnClick="UnlockAsync">
+                @if (_unlocking)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                Unlock
+            </MudButton>
+        </MudPaper>
+    </MudContainer>
 }
-else if (_problem == null)
+else if (_state == State.Loaded)
 {
-    <MudAlert Severity="Severity.Error">Problem not found.</MudAlert>
-}
-else
-{
-    <MudText Typo="Typo.h4" GutterBottom="true">@_problem.Title</MudText>
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+        <MudText Typo="Typo.h4">@_problem!.Title</MudText>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                   Disabled="_isDownloading"
+                   OnClick="DownloadPdfAsync">
+            @if (_isDownloading)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <span>Generating...</span>
+            }
+            else
+            {
+                <span>Save as PDF</span>
+            }
+        </MudButton>
+    </MudStack>
 
     @if (!string.IsNullOrWhiteSpace(_problem.Description))
     {
@@ -61,27 +103,81 @@ else
         </MudTimeline>
     }
 }
+else if (_state == State.NotFound)
+{
+    <MudAlert Severity="Severity.Error">Problem not found.</MudAlert>
+}
+else if (_state == State.NotPublic)
+{
+    <MudAlert Severity="Severity.Warning">This problem is not publicly accessible.</MudAlert>
+}
 
 @code {
     [Parameter] public Guid Id { get; set; }
 
+    private enum State { EnteringPassword, Unlocking, Loaded, NotFound, NotPublic }
+
+    private State _state = State.EnteringPassword;
+    private string _password = string.Empty;
+    private bool _unlocking;
+    private bool _wrongPassword;
+    private bool _isDownloading;
     private ProblemDto? _problem;
     private List<EventDto> _events = [];
-    private bool _loading = true;
 
-    protected override async Task OnInitializedAsync()
+    private async Task OnKeyDown(KeyboardEventArgs e)
     {
-        _problem = await ProblemService.GetByIdAsync(Id);
-
-        var result = await EventService.SearchAsync(new EventSearchDto
-        {
-            ProblemId = Id,
-            PageSize = 1000,
-            OrderBy = "EventDate",
-            OrderDirection = OrderDirection.Ascending
-        });
-        _events = result?.Items?.ToList() ?? [];
-
-        _loading = false;
+        if (e.Key == "Enter") await UnlockAsync();
     }
+
+    private async Task UnlockAsync()
+    {
+        _wrongPassword = false;
+        _unlocking = true;
+
+        var response = await Http.PostAsJsonAsync($"api/Problem/{Id}/unlock", new { Password = _password });
+
+        if (response.IsSuccessStatusCode)
+        {
+            var data = await response.Content.ReadFromJsonAsync<UnlockResponse>();
+            _problem = data?.Problem;
+            _events = data?.Events ?? [];
+            _state = State.Loaded;
+        }
+        else if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            _state = State.NotFound;
+        }
+        else if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _state = State.NotPublic;
+        }
+        else
+        {
+            _wrongPassword = true;
+        }
+
+        _unlocking = false;
+    }
+
+    private async Task DownloadPdfAsync()
+    {
+        _isDownloading = true;
+        try
+        {
+            var response = await Http.PostAsJsonAsync($"api/Problem/{Id}/pdf-public", new { Password = _password });
+            if (response.IsSuccessStatusCode)
+            {
+                var bytes = await response.Content.ReadAsByteArrayAsync();
+                var filename = $"{_problem?.Title ?? "problem"}.pdf";
+                await JS.InvokeVoidAsync("downloadFile", filename, "application/pdf", bytes);
+            }
+        }
+        finally
+        {
+            _isDownloading = false;
+        }
+    }
+
+    private record UnlockResponse(ProblemDto Problem, List<EventDto> Events);
 }

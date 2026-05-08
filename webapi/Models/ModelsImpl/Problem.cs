@@ -15,4 +15,5 @@ public class Problem : IModel, IEntityWithUser
     public List<Coordinate> Coordinates { get; set; } = [];
     public ApplicationUser? User { get; set;}
     public Guid? UserId { get; set; }
+    public string? PublicPassword { get; set; }
 }

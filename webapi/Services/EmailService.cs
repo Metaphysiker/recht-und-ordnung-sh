@@ -38,15 +38,15 @@ public class EmailService : IEmailService
             var message = new System.Net.Mail.MailMessage
             {
                 From = new System.Net.Mail.MailAddress(fromEmail, fromName),
-                Subject = "Your Magic Link",
+                Subject = "Anmeldelink",
                 Body = $@"
                     <html>
                         <body>
-                            <h2>Login to Recht und Ordnung - Schaffhausen</h2>
-                            <p>Click the link below to sign in:</p>
-                            <p><a href=""{magicLink}"">Sign In</a></p>
-                            <p>This link will expire in 15 minutes.</p>
-                            <p>If you didn't request this link, you can safely ignore this email.</p>
+                            <h2>Anmeldung bei Recht und Ordnung - Schaffhausen</h2>
+                            <p>Klicken Sie auf den untenstehenden Link, um sich anzumelden:</p>
+                            <p><a href=""{magicLink}"">Anmelden</a></p>
+                            <p>Dieser Link ist 15 Minuten gültig.</p>
+                            <p>Falls Sie diesen Link nicht angefordert haben, können Sie diese E-Mail ignorieren.</p>
                         </body>
                     </html>",
                 IsBodyHtml = true

@@ -120,6 +120,7 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
     {
         var problem = await _dbSet
             .Include(p => p.Events)
+            .Include(p => p.Attachments)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (problem == null)
@@ -145,7 +146,18 @@ public class ProblemController : ModelDtoControllerBase<Problem, ProblemDto, Pro
             })
             .ToList();
 
-        return Ok(new { Problem = MapToDto(problem), Events = events });
+        var attachments = problem.Attachments
+            .OrderBy(a => a.CreatedAt)
+            .Select(a => new AttachmentDto
+            {
+                Id = a.Id,
+                FileName = a.FileName,
+                ContentType = a.ContentType,
+                FileSizeBytes = a.FileSizeBytes,
+            })
+            .ToList();
+
+        return Ok(new { Problem = MapToDto(problem), Events = events, Attachments = attachments });
     }
 
     [HttpGet("{id}/pdf")]

@@ -6,6 +6,7 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject IDialogService DialogService
 @inject IStringLocalizer<SharedResource> L
 
 <PageTitle>@(_problem?.Title ?? "Problem")</PageTitle>
@@ -103,6 +104,39 @@ else if (_state == State.Loaded)
             }
         </MudTimeline>
     }
+
+    @if (_attachments.Any())
+    {
+        <MudDivider Class="my-4" />
+        <MudText Typo="Typo.h6" GutterBottom="true">@L["Attachment.Title"]</MudText>
+        <MudPaper Elevation="1">
+            <MudList T="AttachmentDto">
+                @foreach (var attachment in _attachments)
+                {
+                    <MudListItem>
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudIcon Icon="@(IsImage(attachment.ContentType) ? Icons.Material.Filled.Image : Icons.Material.Filled.AttachFile)" Class="mr-2" />
+                            <MudText Class="flex-grow-1">
+                                @attachment.FileName
+                                <MudText Typo="Typo.caption" Color="Color.Secondary" Inline="true">
+                                    (@FormatBytes(attachment.FileSizeBytes))
+                                </MudText>
+                            </MudText>
+                            @if (IsImage(attachment.ContentType))
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                               title="@L["Common.Preview"]"
+                                               OnClick="@(() => PreviewAttachmentAsync(attachment))" />
+                            }
+                            <MudIconButton Icon="@Icons.Material.Filled.Download"
+                                           title="@L["Common.Download"]"
+                                           OnClick="@(() => DownloadAttachmentAsync(attachment))" />
+                        </MudStack>
+                    </MudListItem>
+                }
+            </MudList>
+        </MudPaper>
+    }
 }
 else if (_state == State.NotFound)
 {
@@ -125,6 +159,7 @@ else if (_state == State.NotPublic)
     private bool _isDownloading;
     private ProblemDto? _problem;
     private List<EventDto> _events = [];
+    private List<AttachmentDto> _attachments = [];
 
     private async Task OnKeyDown(KeyboardEventArgs e)
     {
@@ -143,6 +178,7 @@ else if (_state == State.NotPublic)
             var data = await response.Content.ReadFromJsonAsync<UnlockResponse>();
             _problem = data?.Problem;
             _events = data?.Events ?? [];
+            _attachments = data?.Attachments ?? [];
             _state = State.Loaded;
         }
         else if (response.StatusCode == HttpStatusCode.NotFound)
@@ -180,5 +216,41 @@ else if (_state == State.NotPublic)
         }
     }
 
-    private record UnlockResponse(ProblemDto Problem, List<EventDto> Events);
+    private async Task DownloadAttachmentAsync(AttachmentDto attachment)
+    {
+        var response = await Http.PostAsJsonAsync($"api/Attachment/{attachment.Id}/download-public", new { Password = _password });
+        if (response.IsSuccessStatusCode)
+        {
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            await JS.InvokeVoidAsync("downloadFile", attachment.FileName, attachment.ContentType, bytes);
+        }
+    }
+
+    private async Task PreviewAttachmentAsync(AttachmentDto attachment)
+    {
+        var response = await Http.PostAsJsonAsync($"api/Attachment/{attachment.Id}/download-public", new { Password = _password });
+        if (!response.IsSuccessStatusCode) return;
+
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var dataUrl = $"data:{attachment.ContentType};base64,{Convert.ToBase64String(bytes)}";
+        var parameters = new DialogParameters<AttachmentPreviewDialog>
+        {
+            { x => x.ImageDataUrl, dataUrl },
+            { x => x.FileName, attachment.FileName }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseButton = true };
+        await DialogService.ShowAsync<AttachmentPreviewDialog>(attachment.FileName, parameters, options);
+    }
+
+    private static bool IsImage(string? contentType) =>
+        contentType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true;
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / (1024.0 * 1024):F1} MB";
+    }
+
+    private record UnlockResponse(ProblemDto Problem, List<EventDto> Events, List<AttachmentDto> Attachments);
 }

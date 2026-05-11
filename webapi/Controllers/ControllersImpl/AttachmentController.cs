@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Controllers;
@@ -106,6 +107,28 @@ public class AttachmentController : ModelDtoControllerBase<Attachment, Attachmen
         return File(stream, contentType, entity.FileName);
     }
 
+    [AllowAnonymous]
+    [HttpPost("{id}/download-public")]
+    public async Task<IActionResult> DownloadPublic(Guid id, [FromBody] PublicAttachmentDownloadRequest request)
+    {
+        var entity = await _dbSet
+            .Include(a => a.Problem)
+            .FirstOrDefaultAsync(a => a.Id == id);
+
+        if (entity == null) return NotFound();
+
+        var problem = entity.Problem;
+        if (problem == null || problem.PublicPassword == null) return Forbid();
+
+        var hasher = new PasswordHasher<Problem>();
+        var result = hasher.VerifyHashedPassword(problem, problem.PublicPassword, request.Password);
+        if (result == PasswordVerificationResult.Failed) return Unauthorized();
+
+        var stream = await _s3.DownloadAsync(entity.S3Key);
+        var contentType = string.IsNullOrWhiteSpace(entity.ContentType) ? "application/octet-stream" : entity.ContentType;
+        return File(stream, contentType, entity.FileName);
+    }
+
     public override async Task<IActionResult> Delete(Guid id)
     {
         var entity = await _dbSet.FindAsync(id);
@@ -141,3 +164,5 @@ public class AttachmentController : ModelDtoControllerBase<Attachment, Attachmen
         return ExtensionMimeTypes.TryGetValue(ext, out var mime) ? mime : "application/octet-stream";
     }
 }
+
+public record PublicAttachmentDownloadRequest(string Password);

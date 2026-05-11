@@ -1,5 +1,6 @@
 @inject AttachmentService AttachmentService
 @inject IJSRuntime JS
+@inject IDialogService DialogService
 @inject IStringLocalizer<SharedResource> L
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
@@ -23,13 +24,19 @@
             {
                 <MudListItem>
                     <MudStack Row="true" AlignItems="AlignItems.Center">
-                        <MudIcon Icon="@Icons.Material.Filled.AttachFile" Class="mr-2" />
+                        <MudIcon Icon="@GetFileIcon(attachment.ContentType)" Class="mr-2" />
                         <MudText Class="flex-grow-1">
                             @attachment.FileName
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Inline="true">
                                 (@FormatBytes(attachment.FileSizeBytes))
                             </MudText>
                         </MudText>
+                        @if (IsImage(attachment.ContentType))
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                           title="@L["Common.Preview"]"
+                                           OnClick="@(() => PreviewAsync(attachment))" />
+                        }
                         <MudIconButton Icon="@Icons.Material.Filled.Download"
                                        title="@L["Common.Download"]"
                                        OnClick="@(() => DownloadAsync(attachment))" />
@@ -89,6 +96,27 @@
         if (deleted)
             _attachments.Remove(attachment);
     }
+
+    private async Task PreviewAsync(AttachmentDto attachment)
+    {
+        var bytes = await AttachmentService.DownloadAsync(attachment.Id!.Value);
+        if (bytes == null) return;
+
+        var dataUrl = $"data:{attachment.ContentType};base64,{Convert.ToBase64String(bytes)}";
+        var parameters = new DialogParameters<AttachmentPreviewDialog>
+        {
+            { x => x.ImageDataUrl, dataUrl },
+            { x => x.FileName, attachment.FileName ?? string.Empty }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseButton = true };
+        await DialogService.ShowAsync<AttachmentPreviewDialog>(attachment.FileName, parameters, options);
+    }
+
+    private static bool IsImage(string? contentType) =>
+        contentType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true;
+
+    private static string GetFileIcon(string? contentType) =>
+        IsImage(contentType) ? Icons.Material.Filled.Image : Icons.Material.Filled.AttachFile;
 
     private static string FormatBytes(long bytes)
     {

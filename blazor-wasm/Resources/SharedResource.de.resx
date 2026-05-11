@@ -121,6 +121,9 @@
   <data name="Common.Download" xml:space="preserve">
     <value>Herunterladen</value>
   </data>
+  <data name="Common.Preview" xml:space="preserve">
+    <value>Vorschau</value>
+  </data>
   <data name="Common.Back" xml:space="preserve">
     <value>Zurück</value>
   </data>

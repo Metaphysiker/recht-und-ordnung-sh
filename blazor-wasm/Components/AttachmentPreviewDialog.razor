@@ -1,0 +1,23 @@
+@inject IStringLocalizer<SharedResource> L
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@FileName</MudText>
+    </TitleContent>
+    <DialogContent>
+        <img src="@ImageDataUrl"
+             alt="@FileName"
+             style="max-width: 100%; max-height: 70vh; object-fit: contain; display: block; margin: auto;" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close" Color="Color.Default">@L["Common.Close"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public required string ImageDataUrl { get; set; }
+    [Parameter] public required string FileName { get; set; }
+
+    private void Close() => MudDialog.Close();
+}
